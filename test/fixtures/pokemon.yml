@@ -1,0 +1,23 @@
+pikachu:
+  pokeapi_id: 25
+  name: pikachu
+  image_url: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png
+  primary_type: electric
+  height: 4
+  weight: 60
+  base_experience: 112
+  raw_payload:
+    id: 25
+    name: pikachu
+
+bulbasaur:
+  pokeapi_id: 1
+  name: bulbasaur
+  image_url: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png
+  primary_type: grass
+  height: 7
+  weight: 69
+  base_experience: 64
+  raw_payload:
+    id: 1
+    name: bulbasaur

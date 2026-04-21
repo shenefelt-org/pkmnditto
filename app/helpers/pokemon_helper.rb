@@ -9,9 +9,9 @@ module PokemonHelper
 
     def get_pokemon_details(pokemon_name)
         response = HTTParty.get($pokemon_endpoint << pokemon_name)
-        return nil if response.blank?
+        return nil if response.blank? || response.code != 200
 
-        [response.parsed_response, pokemon_image(response.parsed_response)]
+        response.parsed_response
     end
 
     def pokemon_image(pokemon_details)
@@ -20,12 +20,12 @@ module PokemonHelper
 
     def get_pokemon_evolution_chain(pokemon_details)
         species_response = HTTParty.get(pokemon_details['species']['url'])
-        return nil if species_response.blank?
+        return nil if species_response.blank? || species_response.code != 200
         evolution_chain_url = species_response.parsed_response['evolution_chain']['url']
         evolution_chain_response = HTTParty.get(evolution_chain_url)
-        return nil if evolution_chain_response.blank?
+        return nil if evolution_chain_response.blank? || evolution_chain_response.code != 200
         evolution_chain_response.parsed_response['chain']
-    end
+        
 
     def get_all_items
         response = HTTParty.get($item_endpoint)
