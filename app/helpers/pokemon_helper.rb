@@ -1,6 +1,6 @@
 require 'httparty'
 require 'json'
-module PokemonHelper
+module PokemonsHelper
   $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx')
   $default_pokemon_id = 124 # pokedex id for jynx
 
@@ -61,7 +61,6 @@ module PokemonHelper
 
   end
 
-
   # parser for search by name and id creates new pokemon obj
   # for each array you go into like ability items etc you loop through and output the key value name so json returns abilities {[ability: name ]} so you parse as so
   def parse_single_pokemon_results(pokemon = $default_pokemon)
@@ -79,10 +78,12 @@ module PokemonHelper
     end
   end
 
+  # grab main pokemon sprite
   def get_pokemon_artwork(pokemon = $default_pokemon)
     puts pokemon['sprites']['other']['home']['front_default']
   end
 
+  # get items a pokem is holding if there are any.
   def get_held_items(pokemon = $default_pokemon)
     pokemon['held_items'].each do |item|
       puts "Held item name: #{item['item']['name']}"
@@ -90,6 +91,7 @@ module PokemonHelper
     end
   end
 
+  # get the evolustion chain for a given pokemon 
   def get_pokemon_evolution_chain(pokemon = $default_pokemon)
     evolution_map = {}
     evolution_chain_url = pokemon['species']['url']
