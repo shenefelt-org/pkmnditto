@@ -39,14 +39,19 @@ module PokemonsHelper
   def get_pokemon_by_poke_id(id = $default_pokemon_id)
     response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{id}")
     p_data = response.parsed_response
-    return nil if p_data.blank? else return p_data end
+    return p_data if !p_data.empty? 
+
+    puts "No pokemon found with id #{id}"
+    nil
 
   end
 
   def get_pokemon_by_type(type = 'fairy')
-    res = HTTParty.get("https://pokeapi.co/api/v2/type/#{type.downcase}")
+    type_response = HTTParty.get("https://pokeapi.co/api/v2/type/#{type.downcase}")
 
-    return nil if res.blank? else return res.parsed_response end
+    return type_response.parsed_response unless type_response.empty? || type_response.blank?
+
+    nil
 
   end
 
