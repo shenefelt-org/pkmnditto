@@ -96,21 +96,23 @@ module PokemonsHelper
 
   # get the evolustion chain for a given pokemon 
   def get_pokemon_evolution_chain(pokemon = $default_pokemon)
-    evolution_map = {}
     evolution_chain_url = pokemon['species']['url']
-    res = HTTParty.get(evolution_chain_url)
-    return nil if res.blank?
-
-    evolution_chain = res['evolution_chain']['url']
-    res2 = HTTParty.get(evolution_chain)
-    return nil if res2.blank?
-
-    puts "Evolution chain for #{pokemon['name']}:"
-    res2['chain']['evolves_to'].each do |evolution|
-      puts evolution['species']['name']
-    end
+    evolution_chain_res = HTTParty.get(evolution_chain_url)
+    return nil if evolution_chain_res.blank?
+    
+    pkmn_evolution_chain = evolution_chain_res['evolution_chain']['url']
+    chain_response = HTTParty.get(pkmn_evolution_chain)
+    return nil if chain_response.blank?
+    # Parse the evolution chain starting from the root and return the evolution map
+    parse_evolutions(chain_response['chain'])
   end
 
+  def parse_evolutions(evolution_chain)
+    evolition_map = { evolution_chain['species']['name'] => [] }
+    evolution_chain['evolves_to'].each do |evolution|
+      evolition_map[evolution_chain['species']['name']] << parse_evolutions(evolution)
+    end
+    evolition_map
 end
 
 
