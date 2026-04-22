@@ -1,4 +1,6 @@
 require "test_helper"
+require "httparty"
+require "json"
 
 class PokemonHelperTest < ActionView::TestCase
     test "should get types" do
