@@ -113,6 +113,7 @@ module PokemonsHelper
       evolition_map[evolution_chain['species']['name']] << parse_evolutions(evolution)
     end
     evolition_map
+  end
 end
 
 
