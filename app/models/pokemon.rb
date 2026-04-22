@@ -1,3 +1,4 @@
+include PokemonsHelper
 class Pokemon < ApplicationRecord
   before_validation :normalize_name
 
@@ -11,20 +12,22 @@ class Pokemon < ApplicationRecord
   scope :ordered_by_pokedex, -> { order(:pokeapi_id) }
   scope :by_type, ->(type_name) { where("LOWER(primary_type) = ?", type_name.to_s.downcase) }
 
-  def self.from_api_payload(payload)
-    return nil if payload.blank?
+  def initialize(pokemon = $default_pokemon)
+    super()
+    return if pokemon.blank?
 
-    pokemon = find_or_initialize_by(pokeapi_id: payload["id"])
-    pokemon.assign_attributes(
-      name: payload["name"],
-      image_url: payload.dig("sprites", "front_default"),
-      primary_type: payload.dig("types", 0, "type", "name"),
-      height: payload["height"],
-      weight: payload["weight"],
-      base_experience: payload["base_experience"],
-      raw_payload: payload
-    )
-    pokemon
+    self.name = pokemon["name"]
+    self.pokeapi_id = pokemon["id"]
+    self.height = pokemon["height"]
+    self.weight = pokemon["weight"]
+    self.base_experience = pokemon["base_experience"]
+
+    types = pokemon["types"] || []
+    primary_type_info = types.find { |t| t["slot"] == 1 }
+    secondary_type_info = types.find { |t| t["slot"] == 2 }
+
+    self.primary_type = primary_type_info ? primary_type_info.dig("type", "name") : nil
+    self.secondary_type = secondary_type_info ? secondary_type_info.dig("type", "name") : nil
   end
 
   private

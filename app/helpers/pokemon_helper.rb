@@ -1,70 +1,69 @@
 require 'httparty'
 require 'json'
 module PokemonsHelper
-  $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx')
+  $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx').parsed_response
   $default_pokemon_id = 124 # pokedex id for jynx
   $type_map = {}
 
   def get_types
-    
+    type_chain = HTTParty.get($type_endpoint)
+    return nil if type_chain.blank?
 
-    res = HTTParty.get($type_endpoint)
-    return nil if res.blank?
-
-    res["results"].each do |type|
-      $type_map[type["name"]] = type["url"]
-    end
-
-    type_map
+    $type_map = type_chain["results"].map { |type| { type["name"] => type["url"] } }
+    $type_map
   end
 
   def get_all_pokemon
     poke_map = {}
-    res = HTTParty.get($pokemon_all_endpoint)
-
-    res["results"].each do |p|
-      name = p["name"]
-      url = p["url"]
-      poke_map[p['name']] = p['url']
-    end
+    poke_chain = HTTParty.get($pokemon_all_endpoint)
+    return nil if poke_chain.blank?
+    poke_map = poke_chain["results"].map { |p| { p["name"] => p["url"] } }
 
     poke_map
   end
 
   # get a pokemon by name we will use tangela as the default if no param
   def get_pokemon_by_name(name = "tangela")
+    puts "You asked for #{name}" unless name == "tangela" 
+    puts "No name provided, defaulting to tangela" if name == "tangela"
     response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{name.downcase}")
     p_data = response.parsed_response #httparty alows us to get the parsed response as a ruby hash.
-    return nil if pdata.blank?
 
-    p_data
+    
+    return p_data unless p_data.blank? 
+
+    
   end
 
   # by default get info for tangela note lets make these build pokemon objects for the application
   def get_pokemon_by_poke_id(id = $default_pokemon_id)
     response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{id}")
     p_data = response.parsed_response
-    return nil if p_data.blank?
+    return nil if p_data.blank? else return p_data end
 
-    p_data
   end
 
   def get_pokemon_by_type(type = 'fairy')
-    res = HTTParty.get("https://pokeapi.co/api/v2/type/#{type}")
+    res = HTTParty.get("https://pokeapi.co/api/v2/type/#{type.downcase}")
 
-    return nil if res.blank?
+    return nil if res.blank? else return res.parsed_response end
 
-    res.parsed_response
   end
+
+  def get_pokemon_names_by_type(type = 'fairy')
+    type_response = get_pokemon_by_type(type)
+    return nil if type_response.blank?
+    
+    return type_response['pokemon'].map { |p| p['pokemon']['name'] }
+  end
+
 
   # get a pokemons abiiltes
   def get_pokemon_abilities(pokemon = $default_pokemon)
     abilities = pokemon['abilities']
-    ability_name = nil
+    return nil if abilities.blank?
 
-    ability_name = abilities.map { |ability| ability['ability']['name'] }
-
-    ability_name 
+    return abilities.map { |ability| ability['ability']['name'] } 
   end
 
 
@@ -72,33 +71,29 @@ module PokemonsHelper
     $type_map = get_types if $type_map.empty?
     type_url = pokemon['types'][0]['type']['url']
     res = HTTParty.get(type_url)
-    return nil if res.blank?
-
-    weakness_map = res['damage_relations']['take_damage_from'].map do |weakness|
-      { weakness['name'] => weakness['url'] }
-    end.reduce(:merge)
-
-    puts weakness_map
+    return nil if res.blank? || res['damage_relations'].blank?
+    return res['damage_relations']['take_damage_from'].map { |weakness| weakness['name'] }
   end
 
   # grab main pokemon sprite
-  def get_pokemon_artwork(pokemon = $default_pokemon)
-    puts pokemon['sprites']['other']['home']['front_default']
+  def get_pokemon_artwork(pokemon = $default_pokemon, sprite_choice = 'front_default')
+    sprite_image_choices = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
+    return nil unless sprite_image_choices.include?(sprite_choice)
+    puts pokemon['sprites']['other']['home'][sprite_choice]
   end
 
   # get items a pokem is holding if there are any.
   def get_held_items(pokemon = $default_pokemon)
-    pokemon['held_items'].each do |item|
-      puts "Held item name: #{item['item']['name']}"
-      puts "url: #{item['item']['url']}"
-    end
+    return nil if pokemon['held_items'].blank? || pokemon['held_items'].empty?
+
+    return pokemon['held_items'].map { |item| item['item']['name'] }
   end
 
   # get the evolustion chain for a given pokemon 
   def get_pokemon_evolution_chain(pokemon = $default_pokemon)
     evolution_chain_url = pokemon['species']['url']
     evolution_chain_res = HTTParty.get(evolution_chain_url)
-    return nil if evolution_chain_res.blank?
+    return nil if evolution_chain_res.blank? || evolution_chain_res.empty?
     
     pkmn_evolution_chain = evolution_chain_res['evolution_chain']['url']
     chain_response = HTTParty.get(pkmn_evolution_chain)
