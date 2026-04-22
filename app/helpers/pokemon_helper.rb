@@ -33,12 +33,9 @@ module PokemonsHelper
 
   # get a pokemon by name we will use tangela as the default if no param
   def get_pokemon_by_name(name = "tangela")
-    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/" << name.downcase)
-    pokemon = response.parsed_response #httparty alows us to get the parsed response as a ruby hash.
-    return nil if pokemon.blank?
-
-    pokemon.parsed_response
-
+    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{name.downcase}")
+    pdata = response.parsed_response #httparty alows us to get the parsed response as a ruby hash.
+    return nil if pdata.blank?
   end
 
   # by default get info for tangela note lets make these build pokemon objects for the application
