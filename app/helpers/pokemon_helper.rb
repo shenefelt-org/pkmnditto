@@ -3,21 +3,19 @@ require 'json'
 module PokemonsHelper
   $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx')
   $default_pokemon_id = 124 # pokedex id for jynx
+  $type_map = {}
 
   def get_types
-    type_map = {}
+    
 
     res = HTTParty.get($type_endpoint)
     return nil if res.blank?
 
     res["results"].each do |type|
-      type_map[type["name"]] = type["url"]
+      $type_map[type["name"]] = type["url"]
     end
 
     type_map
-  end
-
-  def get_weaknesses(pokemon = $default_pokemon)
   end
 
   def get_all_pokemon
@@ -58,24 +56,30 @@ module PokemonsHelper
     return nil if res.blank?
 
     res.parsed_response
-
   end
 
-  # parser for search by name and id creates new pokemon obj
-  # for each array you go into like ability items etc you loop through and output the key value name so json returns abilities {[ability: name ]} so you parse as so
-  def parse_single_pokemon_results(pokemon = $default_pokemon)
-    abilities = pokemon['abilities']
-    puts "#{pokemon['name']} has a total of #{abilities.length}"
-    abilities.each do |a|
-      puts a['ability']['name']
-    end
-  end
-
-  # get all known abilites for a pokemon 
+  # get a pokemons abiiltes
   def get_pokemon_abilities(pokemon = $default_pokemon)
-    pokemon['abilities'].each do |a|
-      puts a['ability']['name']
-    end
+    abilities = pokemon['abilities']
+    ability_name = nil
+
+    ability_name = abilities.map { |ability| ability['ability']['name'] }
+
+    ability_name 
+  end
+
+
+  def get_pokemon_weaknesses(pokemon = $default_pokemon)
+    $type_map = get_types if $type_map.empty?
+    type_url = pokemon['types'][0]['type']['url']
+    res = HTTParty.get(type_url)
+    return nil if res.blank?
+
+    weakness_map = res['damage_relations']['take_damage_from'].map do |weakness|
+      { weakness['name'] => weakness['url'] }
+    end.reduce(:merge)
+
+    puts weakness_map
   end
 
   # grab main pokemon sprite
