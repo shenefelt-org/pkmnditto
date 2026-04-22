@@ -1,25 +1,21 @@
 require 'httparty'
 require 'json'
-module PokemonsHelper
+module PokemonHelper
   $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx').parsed_response
   $default_pokemon_id = 124 # pokedex id for jynx
-  $type_map = {}
 
   def get_types
     type_chain = HTTParty.get($type_endpoint)
     return nil if type_chain.blank?
 
-    $type_map = type_chain["results"].map { |type| { type["name"] => type["url"] } }
-    $type_map
+    return type_chain["results"].map { |type| { type["name"] => type["url"] } }
   end
 
   def get_all_pokemon
     poke_map = {}
     poke_chain = HTTParty.get($pokemon_all_endpoint)
     return nil if poke_chain.blank?
-    poke_map = poke_chain["results"].map { |p| { p["name"] => p["url"] } }
-
-    poke_map
+    return poke_chain["results"].map { |p| { p["name"] => p["url"] } }
   end
 
   # get a pokemon by name we will use tangela as the default if no param
