@@ -1,0 +1,2 @@
+module PokemonNodeHelper
+end
