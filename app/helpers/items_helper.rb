@@ -10,6 +10,7 @@ module ItemsHelper
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
   end
+  # get all items and include their sprites for display
   def get_all_items
     item_chain = HTTParty.get($item_endpoint)
     return nil if item_chain.blank? || item_chain.empty?
