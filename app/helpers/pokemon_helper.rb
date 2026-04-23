@@ -42,7 +42,6 @@ module PokemonHelper
     response = HTTParty.get("#{ENV['PKMN_ENDPOINT']}#{id}")
     return response.parsed_response unless validate_response(response) 
 
-
   end
 
   # Get all pokemon by a given type. default ice-psychic
@@ -64,7 +63,7 @@ module PokemonHelper
     return abilities.map { |ability| ability['ability']['name'] } 
   end
 
-
+  # get all weaknesses related to a pokemon and it's type. 
   def get_pokemon_weaknesses(pokemon = $def_pkmn_request)
     $type_map = get_types if $type_map.empty?
     type_url = pokemon['types'][0]['type']['url']
@@ -103,6 +102,7 @@ module PokemonHelper
     parse_evolutions(chain_response['chain'])
   end
 
+  # parse the evolution chain of a pokemon recursilvey 
   def parse_evolutions(evolution_chain)
     evolition_map = { evolution_chain['species']['name'] => [] }
     evolution_chain['evolves_to'].each do |evolution|
@@ -111,6 +111,7 @@ module PokemonHelper
     evolition_map
   end
 
+  # get all moves of a pokemon
   def get_pokemon_moves(pokemon = $def_pkmn_request)
     return nil if pokemon['moves'].blank? || pokemon['moves'].empty?
 
