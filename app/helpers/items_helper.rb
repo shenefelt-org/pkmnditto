@@ -7,7 +7,7 @@ module ItemsHelper
   $def_item = ENV['DEFAULT_ITEM']
   def get_all_items
     item_chain = HTTParty.get("https://pokeapi.co/api/v2/item/")
-    return item_chain.parsed_results unless item_chain.blank?
+    return item_chain.parsed_response unless item_chain.blank?
   end
 
   # Get any given item by name
