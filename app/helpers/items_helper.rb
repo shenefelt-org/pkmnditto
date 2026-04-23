@@ -12,7 +12,7 @@ module ItemsHelper
   end
   def get_all_items
     item_chain = HTTParty.get($item_endpoint)
-    return nil if item_chain.body.parsed_response.blank? || item_chain.body.parsed_response.empty?
+    return nil if item_chain.blank? || item_chain.empty?
     parsed_res = item_chain['results'].map do |item| 
       item_data = get_item_by_name(item[:name])
       { 
