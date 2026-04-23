@@ -1,16 +1,17 @@
 require 'httparty'
 require 'json'
+require 'dotenv-rails'
+Dotenv.load
 # DEFAULT item will always be master-ball if none is passed in
 module ItemsHelper
-  $item_endpoint = "https://pokeapi.co/api/v2/items"
   def get_all_items
-    item_chain = HTTParty.get($item_endpoint)
+    item_chain = HTTParty.get(ENV['ITEM_ENDPOINT'])
     return item_chain.parsed_results unless item_chain.blank?
   end
 
   # Get any given item by name
   def get_item_by_name(item_name="master-ball")
-    item = HTTParty.get($item_endpoint << item_name)
+    item = HTTParty.get("#{ENV['ITEM_ENDPOINT']}#{item_name.downcase}")
     return item.parsed_response unless item.blank?
   end
 
@@ -32,16 +33,13 @@ module ItemsHelper
     item = get_item_by_name(item_name)
     return nil if item.blank? || item['flavor_text_entries'].empty?
 
-    res = item['flavor_text_entries']
 
-    res.map do |entry|
+    return item['flavor_text_entries'].map do |entry|
       {
         text: entry["text"],
         language_name: entry["language"]["name"]
       }
     end
-
-    return res
   end
 
 end
