@@ -12,7 +12,7 @@ module ItemsHelper
 
   # Get any given item by name
   def get_item_by_name(item_name=$def_item)
-    item = HTTParty.get("#{ENV['ITEM_ENDPOINT']}#{item_name.downcase}")
+    item = HTTParty.get("#{ENV['ITEM_ENDPOINT']}#{item_name}")
     return item.parsed_response unless item.blank?
   end
 
