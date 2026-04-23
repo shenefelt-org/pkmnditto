@@ -10,7 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< Updated upstream
 ActiveRecord::Schema[8.1].define(version: 2026_04_20_000100) do
+=======
+ActiveRecord::Schema[8.1].define(version: 2026_04_22_183809) do
+  create_table "items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "default_sprite_url"
+    t.integer "item_num"
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.string "url"
+  end
+
+>>>>>>> Stashed changes
   create_table "pokemon", force: :cascade do |t|
     t.integer "base_experience"
     t.datetime "created_at", null: false
