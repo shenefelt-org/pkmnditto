@@ -6,8 +6,18 @@ Dotenv.load
 module ItemsHelper
   $def_item = ENV['DEFAULT_ITEM']
   def get_all_items
-    item_chain = HTTParty.get("https://pokeapi.co/api/v2/item/")
-    return item_chain.parsed_response unless item_chain.blank?
+    item_chain = HTTParty.get("#{ENV['ITEM_ENDPOINT']}")
+    return if validate_response(item_chain).nil? 
+    parsed_res = item_chain['results'].map do |item| 
+      item_data = get_item_by_name(item[:name])
+      { 
+        name: item[:name], 
+        url: item[:url],
+        sprite: item_data['sprites']['default']
+      }
+    end
+    return nil if parsed_res.blank? || parsed_res.empty?
+    parsed_res
   end
 
   # Get any given item by name
