@@ -1,5 +1,5 @@
 source "https://rubygems.org"
-
+gem 'dotenv-rails'
 gem "httparty"
 gem "json"
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
