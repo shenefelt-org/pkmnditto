@@ -10,4 +10,12 @@ class PokemonHelperTest < ActionView::TestCase
         assert types.is_a?(Array)
         assert types.any? { |t| t.keys.first == "fire" }
     end
+
+
+    test "should get Mr.Mime" do
+        mime = pokemon_helper.get_pokemon_by_name("mr-mime")
+        assert mime.is_a?(Array)
+        assert mime.first.name == "mr-mime"
+    end
 end
+ 

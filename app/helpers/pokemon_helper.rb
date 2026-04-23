@@ -12,7 +12,6 @@ module PokemonHelper
   end
 
   def get_all_pokemon
-    poke_map = {}
     poke_chain = HTTParty.get($pokemon_all_endpoint)
     return nil if poke_chain.blank?
     return poke_chain["results"].map { |p| { p["name"] => p["url"] } }
@@ -110,6 +109,13 @@ module PokemonHelper
     end
     evolition_map
   end
+
+  def get_pokemon_moves(pokemon = $default_pokemon)
+    return nil if pokemon['moves'].blank? || pokemon['moves'].empty?
+
+    return pokemon['moves'].map { |move| move['move']['name'] }
+  end
+  
 end
 
 
