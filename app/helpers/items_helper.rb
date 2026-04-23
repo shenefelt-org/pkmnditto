@@ -8,7 +8,7 @@ module ItemsHelper
   $item_endpoint = "https://pokeapi.co/api/v2/item/"
   def get_all_items
     item_chain = HTTParty.get($item_endpoint)
-    return if validate_response(item_chain).nil? 
+    return nil if validate_response(item_chain).nil? 
     parsed_res = item_chain['results'].map do |item| 
       item_data = get_item_by_name(item[:name])
       { 
