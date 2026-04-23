@@ -19,7 +19,8 @@ module ItemsHelper
       { 
         name: item['name'], 
         url: item['url'],
-        sprite: item_data['sprites']['default']
+        sprite: item_data['sprites']['default'],
+        flavor_text: get_flavor_text_entries(item['name'])
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
