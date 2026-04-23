@@ -53,7 +53,8 @@ module ItemsHelper
 
 
     return item['flavor_text_entries'].map do |entry|
-      next if entry['language']['name'] != 'en'
+      lang = entry['language']['name']
+      next if lang != 'en' || lang == nil
       {
         text: entry["text"],
         language_name: entry["language"]["name"]
