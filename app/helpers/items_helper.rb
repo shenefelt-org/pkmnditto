@@ -14,10 +14,10 @@ module ItemsHelper
     item_chain = HTTParty.get($item_endpoint)
     return nil if item_chain.blank? || item_chain.empty?
     parsed_res = item_chain['results'].map do |item| 
-      item_data = get_item_by_name(item[:name])
+      item_data = get_item_by_name(item['name'])
       { 
-        name: item[:name], 
-        url: item[:url],
+        name: item['name'], 
+        url: item['url'],
         sprite: item_data['sprites']
       }
     end
