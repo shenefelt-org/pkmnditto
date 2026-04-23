@@ -4,9 +4,10 @@ require 'dotenv-rails'
 Dotenv.load
 # DEFAULT item will always be master-ball if none is passed in
 module ItemsHelper
-  $def_item = ENV['DEFAULT_ITEM']
+  $def_item = "https://pokeapi.co/api/v2/item/master-ball"
+  $item_endpoint = "https://pokeapi.co/api/v2/item/"
   def get_all_items
-    item_chain = HTTParty.get("#{ENV['ITEM_ENDPOINT']}")
+    item_chain = HTTParty.get($item_endpoint)
     return if validate_response(item_chain).nil? 
     parsed_res = item_chain['results'].map do |item| 
       item_data = get_item_by_name(item[:name])
@@ -22,7 +23,7 @@ module ItemsHelper
 
   # Get any given item by name
   def get_item_by_name(item_name=$def_item)
-    item = HTTParty.get("#{ENV['ITEM_ENDPOINT']}#{item_name}")
+    item = HTTParty.get("#{$item_endpoint}#{item_name}")
     return item.parsed_response unless item.blank?
   end
 
