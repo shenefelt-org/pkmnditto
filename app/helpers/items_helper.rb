@@ -18,7 +18,7 @@ module ItemsHelper
       { 
         name: item['name'], 
         url: item['url'],
-        sprite: item_data['sprites']
+        sprite: item_data['sprites']['default']
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
