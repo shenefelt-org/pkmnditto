@@ -4,9 +4,15 @@ require 'dotenv-rails'
 Dotenv.load
 # DEFAULT pkmn will always be jynx if no param is passed in 
 module PokemonHelper
-  $default_pokemon_jynx_request = HTTParty.get(ENV['DEFAULT_PKMN_URL'])
-  $default_pokemon_name = ENV['DEFAULT_PKMN']
+  $def_pkmn_request = HTTParty.get(ENV['DEFAULT_PKMN_URL'])
+  $def_pkmn_name = ENV['DEFAULT_PKMN']
 
+  # helper function to validate HTTParty return responses for validity 
+  def validate_response(response)
+    return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
+  end
+
+  # get all pokemon types with type url endpoints
   def get_types
     type_chain = HTTParty.get(ENV['TYPE_ENDPOINT'])
     return nil if type_chain.blank?
@@ -14,56 +20,44 @@ module PokemonHelper
     return type_chain["results"].map { |type| { type["name"] => type["url"] } }
   end
 
+  # get all pokemon with their url endpoints
   def get_all_pokemon
-    poke_chain = HTTParty.get($pokemon_all_endpoint)
-    return nil if poke_chain.blank?
-    return poke_chain["results"].map { |p| { p["name"] => p["url"] } }
+    list = HTTParty.get(ENV['PKMN_ENDPOINT'])
+    validate_response(list)
+    poke_chain = list.parsed_response
+
+    return poke_chain["results"].map { |poke| { poke["name"] => poke["url"] } }
   end
 
-  # get a pokemon by name we will use tangela as the default if no param
-  def get_pokemon_by_name(name = ENV['DEFAULT_PKMN'])
-    puts "You asked for #{name}" unless name == "tangela" 
-    puts "No name provided, defaulting to tangela" if name == "tangela"
-    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{name.downcase}")
-    p_data = response.parsed_response #httparty alows us to get the parsed response as a ruby hash.
+  # get a pokemon by name, default is jynx
+  def get_pokemon_by_name(name = $def_pkmn_name)
 
-    
-    return p_data unless p_data.blank? 
-
+    response = HTTParty.get("#{ENV['PKMN_ENDPOINT']}#{name.downcase}")
+    return response.parsed_response unless validate_response(response)
     
   end
 
   # by default get info for tangela note lets make these build pokemon objects for the application
   def get_pokemon_by_poke_id(id = ENV['DEFAULT_PKMN_ID'])
-    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{id}")
-    p_data = response.parsed_response
-    return p_data if !p_data.empty? 
+    response = HTTParty.get("#{ENV['PKMN_ENDPOINT']}#{id}")
+    return response.parsed_response unless validate_response(response) 
 
-    puts "No pokemon found with id #{id}"
-    nil
 
   end
 
+  # Get all pokemon by a given type. default ice-psychic
   def get_pokemon_by_type(type = ENV['DEFAULT_PKMN_TYPE'])
-    type_response = HTTParty.get("https://pokeapi.co/api/v2/type/#{type.downcase}")
+    type_response = HTTParty.get("#{ENV['TYPE_ENDPOINT']}#{type.downcase}")
+    return nil if validate_response(type_response).nil?
+    type_chain = type_response.parsed_response
 
-    return type_response.parsed_response unless type_response.empty? || type_response.blank?
-
-    nil
-
-  end
-
-  def get_pokemon_names_by_type(type = ENV['DEFAULT_PKMN_TYPE'])
-    type_response = get_pokemon_by_type(type)
-    return nil if type_response.blank?
-    
-    return type_response['pokemon'].map { |p| p['pokemon']['name'] }
+    return type_chain['pokemon'].map { |poke| poke['pokemon']['name'] }
   end
 
 
   # get a pokemons abiiltes
-  def get_pokemon_abilities(pokemon = $default_pokemon)
-    pokemon = $default_pokemon_jynx_request.parsed_response if pokemon == $default_pokemon
+  def get_pokemon_abilities(pokemon = $def_pkmn_request)
+    pokemon = $def_pkmn_request.parsed_response if pokemon == $def_pkmn_request
     abilities = pokemon['abilities']
     return nil if abilities.blank?
 
@@ -71,16 +65,16 @@ module PokemonHelper
   end
 
 
-  def get_pokemon_weaknesses(pokemon = $default_pokemon)
+  def get_pokemon_weaknesses(pokemon = $def_pkmn_request)
     $type_map = get_types if $type_map.empty?
     type_url = pokemon['types'][0]['type']['url']
     res = HTTParty.get(type_url)
-    return nil if res.blank? || res['damage_relations'].blank?
+    validate_response(res)
     return res['damage_relations']['take_damage_from'].map { |weakness| weakness['name'] }
   end
 
   # grab main pokemon sprite
-  def get_pokemon_artwork(pokemon = $default_pokemon, sprite_choice = 'front_default')
+  def get_pokemon_artwork(pokemon = $def_pkmn_request, sprite_choice = 'front_default')
     sprite_image_choices = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
     return nil unless sprite_image_choices.include?(sprite_choice)
     puts pokemon['sprites']['other']['home'][sprite_choice]
@@ -88,14 +82,16 @@ module PokemonHelper
 
   # get items a pokem is holding if there are any.
   # TODO add url mapping here to the items end point
-  def get_held_items(pokemon = $default_pokemon)
+  def get_held_items(pokemon = $def_pkmn_request)
+    return pokemon.parsed_response unless validate_response(pokemon)
     return nil if pokemon['held_items'].blank? || pokemon['held_items'].empty?
 
     return pokemon['held_items'].map { |item| item['item']['name'] }
   end
 
   # get the evolustion chain for a given pokemon 
-  def get_pokemon_evolution_chain(pokemon = $default_pokemon)
+  def get_pokemon_evolution_chain(pokemon = $def_pkmn_request)
+    pokemon = $def_pkmn_request.parsed_response if pokemon == $def_pkmn_request
     evolution_chain_url = pokemon['species']['url']
     evolution_chain_res = HTTParty.get(evolution_chain_url)
     return nil if evolution_chain_res.blank? || evolution_chain_res.empty?
@@ -115,7 +111,7 @@ module PokemonHelper
     evolition_map
   end
 
-  def get_pokemon_moves(pokemon = $default_pokemon)
+  def get_pokemon_moves(pokemon = $def_pkmn_request)
     return nil if pokemon['moves'].blank? || pokemon['moves'].empty?
 
     return pokemon['moves'].map { |move| move['move']['name'] }
