@@ -4,8 +4,8 @@ require 'dotenv-rails'
 Dotenv.load
 # DEFAULT pkmn will always be jynx if no param is passed in 
 module PokemonHelper
-  $def_pkmn_request = HTTParty.get(ENV['DEFAULT_PKMN_URL'])
-  $def_pkmn_name = ENV['DEFAULT_PKMN']
+  $def_pkmn_request = HTTParty.get("#{ENV['DEFAULT_PKMN_URL']}")
+  $def_pkmn_name = "#{ENV['DEFAULT_PKMN']}"
 
   # helper function to validate HTTParty return responses for validity 
   def validate_response(response)
