@@ -1,11 +1,14 @@
 require 'httparty'
 require 'json'
+require 'dotenv-rails'
+Dotenv.load
+# DEFAULT pkmn will always be jynx if no param is passed in 
 module PokemonHelper
-  $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx').parsed_response
-  $default_pokemon_id = 124 # pokedex id for jynx
+  $default_pokemon_jynx_request = HTTParty.get(ENV['DEFAULT_PKMN_URL'])
+  $default_pokemon_name = ENV['DEFAULT_PKMN']
 
   def get_types
-    type_chain = HTTParty.get($type_endpoint)
+    type_chain = HTTParty.get(ENV['TYPE_ENDPOINT'])
     return nil if type_chain.blank?
 
     return type_chain["results"].map { |type| { type["name"] => type["url"] } }
@@ -18,7 +21,7 @@ module PokemonHelper
   end
 
   # get a pokemon by name we will use tangela as the default if no param
-  def get_pokemon_by_name(name = "tangela")
+  def get_pokemon_by_name(name = ENV['DEFAULT_PKMN'])
     puts "You asked for #{name}" unless name == "tangela" 
     puts "No name provided, defaulting to tangela" if name == "tangela"
     response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{name.downcase}")
@@ -31,7 +34,7 @@ module PokemonHelper
   end
 
   # by default get info for tangela note lets make these build pokemon objects for the application
-  def get_pokemon_by_poke_id(id = $default_pokemon_id)
+  def get_pokemon_by_poke_id(id = ENV['DEFAULT_PKMN_ID'])
     response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{id}")
     p_data = response.parsed_response
     return p_data if !p_data.empty? 
@@ -41,7 +44,7 @@ module PokemonHelper
 
   end
 
-  def get_pokemon_by_type(type = 'fairy')
+  def get_pokemon_by_type(type = ENV['DEFAULT_PKMN_TYPE'])
     type_response = HTTParty.get("https://pokeapi.co/api/v2/type/#{type.downcase}")
 
     return type_response.parsed_response unless type_response.empty? || type_response.blank?
@@ -50,7 +53,7 @@ module PokemonHelper
 
   end
 
-  def get_pokemon_names_by_type(type = 'fairy')
+  def get_pokemon_names_by_type(type = ENV['DEFAULT_PKMN_TYPE'])
     type_response = get_pokemon_by_type(type)
     return nil if type_response.blank?
     
@@ -60,6 +63,7 @@ module PokemonHelper
 
   # get a pokemons abiiltes
   def get_pokemon_abilities(pokemon = $default_pokemon)
+    pokemon = $default_pokemon_jynx_request.parsed_response if pokemon == $default_pokemon
     abilities = pokemon['abilities']
     return nil if abilities.blank?
 
@@ -83,6 +87,7 @@ module PokemonHelper
   end
 
   # get items a pokem is holding if there are any.
+  # TODO add url mapping here to the items end point
   def get_held_items(pokemon = $default_pokemon)
     return nil if pokemon['held_items'].blank? || pokemon['held_items'].empty?
 
@@ -119,9 +124,5 @@ module PokemonHelper
 end
 
 
-=begin
-run all methods as test with the default pokemon (jynx)
-no param needed as default pokemon is passed in as def
-=end
 
 
