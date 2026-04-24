@@ -29,6 +29,18 @@ module ItemsHelper
     $items = parsed_res
   end
 
+  def build_item_node(item = nil)
+    item = get_item_by_name($def_item) if item.nil?
+    return {
+      name: item['name'],
+      url: item['url'],
+      sprite: item['sprites']['default'],
+      flavor_text: get_flavor_text($def_item, item),
+      generations: get_game_versions($def_item, item),
+      short_effect: get_short_effect($def_item, item)
+    }
+  end
+
   def print_all_items
     $items = get_all_items() if $items.blank? || $items.empty?
     $items.each_with_index do |item, index|
@@ -82,6 +94,15 @@ module ItemsHelper
     return nil if item.blank? || item.empty? || item['effect_entries'].empty?
     effect_entry = item['effect_entries'].find {|entry| entry['language']['name'] == 'en'}
     return (effect_entry.empty?) ? nil : effect_entry['short_effect']
+  end
+
+  def search_for_item_name_input
+
+    puts "What item are you looking for?"
+    item = gets.chomp
+    # parameterize converts any input with space to in-put and always downcases
+    item_call = HTTParty("#{$item_endpoint}#{item.parameterize}")
+
   end
 
 
