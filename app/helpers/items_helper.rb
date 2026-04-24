@@ -49,6 +49,8 @@ module ItemsHelper
     item_node.each_pair do |key, value|
       puts "#{key} => #{value}"
     end
+
+    true
   end
 
   def print_all_items
