@@ -56,16 +56,8 @@ module ItemsHelper
 
   def print_all_items
     $items = get_all_items() if $items.blank? || $items.empty?
-    $items.each_with_index do |item, index|
-      exit if index >= 10 
-      puts "Name: #{item[:name]}"
-      puts "URL: #{item[:url]}"
-      puts "Sprite: #{item[:sprite]}"
-      puts "Flavor Text: #{item[:flavor_text]}"
-      puts "Generations: #{item[:generations]}"
-      puts "Short Effect: #{item[:short_effect]}"
-      puts "-----------------------------"
-    end
+    $items.each {|item| display_item_node(item_node: item) }
+
     "thats all queen" # Return nil to avoid printing the array of items again in the console
   end
 
