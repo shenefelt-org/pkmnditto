@@ -5,6 +5,7 @@ module TypesHelper
   $default_type = "#{$type_endpoint}7"
   $types = []
   
+  # also have this built a map that maps the name to the id of hte type
   def get_all_types
     types = HTTParty.get($type_endpoint)
     return nil if types.empty? || types['results'].empty?
@@ -21,7 +22,7 @@ module TypesHelper
       name: type['name'],
       url: type['url'],
       # store an array of hashes
-      damage_relations: [ get_damage_relations(type_url: type['url']) ]
+      damage_relations: [ get_damage_relations(type_url: type_url) ]
     } 
 
   end
