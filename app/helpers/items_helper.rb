@@ -3,7 +3,7 @@ require 'json'
 # DEFAULT item will always be master-ball if none is passed in
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
-  $item_endpoint = "https://pokeapi.co/api/v2/item/"
+  $item_endpoint = "https://pokeapi.co/api/v2/item?limit=10"
   $items = []
   
   def validate_response(response)
@@ -15,15 +15,15 @@ module ItemsHelper
     item_chain = HTTParty.get($item_endpoint)
     return nil if item_chain.blank? || item_chain.empty?
     parsed_res = item_chain['results'].map do |item| 
-      build_item_node(item['name'])
+      build_item_node(item_name: item['name'], item: item)
     end
     return nil if parsed_res.blank? || parsed_res.empty?
     $items = parsed_res
   end
 
   # build an item node off of the parsed http response
-  def build_item_node(item_name = $def_item, item = nil)
-    item = get_item_by_name(item_name) if item.nil?
+  def build_item_node(item: nil)
+    item = get_item_by_name("rare-candy") if item.nil?
     return {
       name: item['name'],
       url: item['url'],
