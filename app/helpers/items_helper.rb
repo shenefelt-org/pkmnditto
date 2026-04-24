@@ -31,11 +31,12 @@ module ItemsHelper
   end
 
   # build an item node off of the parsed http response
+  # we have to get the url this way because we depend on mapping through all of the item objects first, the item itself doesn't have a url attribute in the res.
   def build_item_node(item_name: 'rare-candy')
     item = get_item_by_name(item_name)
     return {
       name: item['name'],
-      url: item['url'],
+      url: "#{$item_endpoint}#{item['name']}",
       sprite: item['sprites']['default'],
       flavor_text: get_flavor_text_entries($def_item, item),
       generations: get_game_versions($def_item, item),
