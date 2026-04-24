@@ -5,7 +5,7 @@ module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
   $item_endpoint = "https://pokeapi.co/api/v2/item/"
   $items = []
-  $gen_names_map = {}
+  $gen_names_map = []
   
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
