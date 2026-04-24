@@ -33,15 +33,16 @@ module ItemsHelper
 
   # build an item node off of the parsed http response
   # we have to get the url this way because we depend on mapping through all of the item objects first, the item itself doesn't have a url attribute in the res.
+  # TODO FIX ARG CALL ON FLAVOR TEXT TO KEYWORDS
   def build_item_node(item_name: 'rare-candy')
     item = get_item_by_name(item_name)
     return {
       name: item['name'],
       url: "#{$item_endpoint}#{item['name']}",
       sprite: item['sprites']['default'],
-      flavor_text: get_flavor_text_entries($def_item, item),
-      generations: get_game_versions($def_item, item), # table has col that is bool for each gen i.e. honnen true kanto true etc.
-      short_effect: get_short_effect($def_item, item)
+      flavor_text: get_flavor_text_entries(item_name:$def_item, item: item),
+      generations: get_game_versions(item_name:$def_item, item: item), # table has col that is bool for each gen i.e. honnen true kanto true etc.
+      short_effect: get_short_effect(item_name:$def_item, item: item)
     }
   end
 
@@ -68,7 +69,7 @@ module ItemsHelper
   end
 
   # Get the flavor text entries for a given item. 
-  def get_flavor_text_entries(item_name=$def_item, item = nil)
+  def get_flavor_text_entries(item_name: $def_item, item: nil)
     if !item.nil?
       english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
       return english['text'] unless english.nil? || english.empty?
