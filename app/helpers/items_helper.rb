@@ -85,11 +85,13 @@ module ItemsHelper
     item = get_item_by_name(item_name) if item.nil?
     return nil if item.blank? || item.empty?
     gen_names = []
+    gen_names_map = {}
     item['game_indices'].each do |key| 
       gen_name = HTTParty.get(key['generation']['url'])
+      gen_names_map[:name] = gen_name['main_region']['name'] unless gen_name.blank? || gen_name.empty?
       gen_names.push(gen_name['main_region']['name']) unless gen_name.blank? || gen_name.empty?
     end
-
+    gen_names_map.each_pair { |key, value| puts value }
     return gen_names unless gen_names.empty?
     return nil
   end
