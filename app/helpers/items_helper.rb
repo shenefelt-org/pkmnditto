@@ -6,6 +6,7 @@ Dotenv.load
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
   $item_endpoint = "https://pokeapi.co/api/v2/item/"
+  $items = self.get_all_items
   
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
@@ -26,6 +27,17 @@ module ItemsHelper
     end
     return nil if parsed_res.blank? || parsed_res.empty?
     parsed_res
+  end
+
+  def print_all_items
+    $items = get_all_items if $items.blank? || $items.empty?
+    $items.each do |item|
+      puts "Name: #{item[:name]}"
+      puts "URL: #{item[:url]}"
+      puts "Sprite: #{item[:sprite]}"
+      puts "Flavor Text: #{item[:flavor_text]}"
+      puts "-----------------------------"
+    end
   end
 
   # Get any given item by name
