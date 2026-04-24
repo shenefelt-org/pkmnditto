@@ -30,7 +30,7 @@ module ItemsHelper
   end
 
   def print_all_items
-    $items = get_all_items if $items.blank? || $items.empty?
+    $items = get_all_items() if $items.blank? || $items.empty?
     $items.each do |item|
       puts "Name: #{item[:name]}"
       puts "URL: #{item[:url]}"
