@@ -80,7 +80,7 @@ module ItemsHelper
   end
 
   # get the versions of the game the item is in
-  def get_game_versions(item_name = $def_item, item = nil)
+  def get_game_versions(item_name: $def_item, item: nil)
     item = get_item_by_name(item_name) if item.nil?
     return nil if item.blank? || item.empty?
     gen_names = []
@@ -94,7 +94,7 @@ module ItemsHelper
   end
 
   # get the items short effect text
-  def get_short_effect(item_name = $def_name, item = nil)
+  def get_short_effect(item_name: $def_name, item: nil)
     item = get_item_by_name(item_name) if item.nil?
     return nil if item.blank? || item.empty? || item['effect_entries'].empty?
     effect_entry = item['effect_entries'].find {|entry| entry['language']['name'] == 'en'}
