@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_24_151551) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_215028) do
   create_table "items", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "flavor_text"
     t.text "generations"
     t.string "name"
     t.string "short_effect"
