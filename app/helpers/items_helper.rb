@@ -114,7 +114,7 @@ module ItemsHelper
     puts "What item are you looking for?"
     item = gets.chomp
     # parameterize converts any input with space to in-put and always downcases
-    item = $items.find { |item| item[:name] == item.parameterize }
+    item = $items.find { |item| item[:name] == item }
 
     return item unless item.nil? || item.empty?
     return false
