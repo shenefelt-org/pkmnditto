@@ -56,7 +56,7 @@ module ItemsHelper
 
   def print_all_items
     $items = get_all_items() if $items.blank? || $items.empty?
-    $items.each {|item| display_item_node(item_node: item) }
+    $items.each { |item| display_item_node(item_node: item) }
 
     "thats all queen" # Return nil to avoid printing the array of items again in the console
   end
