@@ -35,7 +35,7 @@ module ItemsHelper
       name: item['name'],
       url: item['url'],
       sprite: item['sprites']['default'],
-      flavor_text: get_flavor_text($def_item, item),
+      flavor_text: get_flavor_text_entries($def_item, item),
       generations: get_game_versions($def_item, item),
       short_effect: get_short_effect($def_item, item)
     }
