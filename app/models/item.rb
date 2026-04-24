@@ -1,13 +1,14 @@
 class Item < ApplicationRecord
   include ItemsHelper
 
-  def copy(node: item_node = nil)
+
+  def copy(node: nil)
     return nil if node.nil?
-    self.name = item_node[:name]
-    self.url = item_node[:url]
-    self.sprite = item_node[:sprite]
-    self.generations = get_game_versions(item: item_node)
-    self.short_effect = get_short_effect(item: item_node)
+    self.name = node[:name]
+    self.url = node[:url]
+    self.sprite = node[:sprite]
+    self.generations = get_game_versions(item: node)
+    self.short_effect = get_short_effect(item: node)
   end
 
 end
