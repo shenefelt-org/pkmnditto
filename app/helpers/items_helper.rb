@@ -31,8 +31,8 @@ module ItemsHelper
   end
 
   # build an item node off of the parsed http response
-  def build_item_node(item_name: 'rare-candy', item: nil)
-    item = get_item_by_name("rare-candy") if item.nil?
+  def build_item_node(item_name: 'rare-candy')
+    item = get_item_by_name(item_name)
     return {
       name: item['name'],
       url: item['url'],
