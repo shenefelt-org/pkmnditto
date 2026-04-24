@@ -1,7 +1,5 @@
 require 'httparty'
 require 'json'
-require 'dotenv-rails'
-Dotenv.load
 # DEFAULT item will always be master-ball if none is passed in
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
