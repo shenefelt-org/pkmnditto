@@ -49,9 +49,8 @@ module ItemsHelper
     return nil if item_node.nil? || item_node.empty?
     item_node.each_pair do |key, value|
       puts "#{key}: #{value}"
-      puts "-----------------------------"
     end
-
+    puts "-----------------------------"
     true
   end
 
