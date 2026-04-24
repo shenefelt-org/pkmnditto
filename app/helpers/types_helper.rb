@@ -2,6 +2,7 @@ require 'httparty'
 require 'json'
 module TypesHelper
   $type_endpoint = "https://pokeapi.co/api/v2/type/"
+  $default_type = "#{$type_endpoint}7"
   $types = []
   
   def get_all_types
@@ -14,7 +15,7 @@ module TypesHelper
 
 
   def build_type_node(type_url: nil)
-    type = get_type_by_name(type_name) if type_url.nil?
+    type = HTTParty.get(type_url.nil? ? $default_type : type_url)
     return nil if type.nil? 
     return {
       name: type['name'],
