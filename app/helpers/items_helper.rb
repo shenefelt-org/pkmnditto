@@ -39,7 +39,7 @@ module ItemsHelper
       puts "Generations: #{item[:generations]}"
       puts "-----------------------------"
     end
-    nil # Return nil to avoid printing the array of items again in the console
+    "thats all queen" # Return nil to avoid printing the array of items again in the console
   end
 
   # Get any given item by name
