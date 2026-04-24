@@ -7,8 +7,7 @@ class Item < ApplicationRecord
     self.name = node[:name]
     self.url = node[:url]
     self.sprite = node[:sprite]
-    self.generations = get_game_versions(item: node)
-    self.short_effect = get_short_effect(item: node)
-  end
+    self.generations = node[:generations]
+    self.short_effect = node[:short_effect]
 
 end
