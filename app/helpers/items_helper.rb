@@ -22,7 +22,8 @@ module ItemsHelper
         url: item['url'],
         sprite: item_data['sprites']['default'],
         flavor_text: get_flavor_text_entries($def_item, item_data),
-        generations: get_game_versions($def_item, item_data)
+        generations: get_game_versions($def_item, item_data),
+        short_effect: get_short_effect($def_item, item_data)
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
@@ -30,7 +31,7 @@ module ItemsHelper
   end
 
   # build an item node off of the parsed http response
-  def build_item_node(item: nil)
+  def build_item_node(item_name: 'rare-candy', item: nil)
     item = get_item_by_name("rare-candy") if item.nil?
     return {
       name: item['name'],
