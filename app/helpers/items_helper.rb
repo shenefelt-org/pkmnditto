@@ -6,7 +6,7 @@ Dotenv.load
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
   $item_endpoint = "https://pokeapi.co/api/v2/item/"
-  $items = get_all_items
+  $items = nil
   
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
@@ -26,7 +26,7 @@ module ItemsHelper
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
-    parsed_res
+    $items = parsed_res
   end
 
   def print_all_items
