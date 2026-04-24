@@ -38,13 +38,13 @@ module ItemsHelper
       puts "Flavor Text: #{item[:flavor_text]}"
       puts "-----------------------------"
     end
-    nil
+    nil # Return nil to avoid printing the array of items again in the console
   end
 
   # Get any given item by name
   def get_item_by_name(item_name=$def_item)
     item = HTTParty.get("#{$item_endpoint}#{item_name}")
-    return item.parsed_response unless item.blank?
+    return item.parsed_response unless item.blank? || item.empty? || item.success? != 200
   end
 
   # Get the flavor text entries for a given item. 
