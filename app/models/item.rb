@@ -1,6 +1,7 @@
 class Item < ApplicationRecord
   include ItemsHelper
 
+  serialize :generations, type: Array, default: []
 
   def copy(node: nil)
     return nil if node.nil?
