@@ -48,7 +48,8 @@ module ItemsHelper
   def display_item_node(item_node: nil)
     return nil if item_node.nil? || item_node.empty?
     item_node.each_pair do |key, value|
-      puts "#{key} => #{value}"
+      puts "#{key}: #{value}"
+      puts "-----------------------------"
     end
 
     true
