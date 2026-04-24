@@ -25,6 +25,7 @@ module ItemsHelper
     end
     return nil if parsed_res.blank? || parsed_res.empty?
     $items = parsed_res
+    return true unless $items.blank? || $items.empty?
   end
 
   def print_all_items
