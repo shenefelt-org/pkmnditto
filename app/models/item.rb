@@ -9,5 +9,6 @@ class Item < ApplicationRecord
     self.sprite = node[:sprite]
     self.generations = node[:generations]
     self.short_effect = node[:short_effect]
+  end
 
 end
