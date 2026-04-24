@@ -27,7 +27,6 @@ module ItemsHelper
     end
     return nil if parsed_res.blank? || parsed_res.empty?
     $items = parsed_res
-    nil
   end
 
   def print_all_items
@@ -39,6 +38,7 @@ module ItemsHelper
       puts "Flavor Text: #{item[:flavor_text]}"
       puts "-----------------------------"
     end
+    nil
   end
 
   # Get any given item by name
