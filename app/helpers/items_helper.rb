@@ -33,7 +33,7 @@ module ItemsHelper
       url: "#{$item_endpoint}#{item['name']}",
       sprite: item['sprites']['default'],
       flavor_text: get_flavor_text_entries(item_name:$def_item, item: item),
-      generations: get_game_versions(item_name:$def_item, item: item), # table has col that is bool for each gen i.e. honnen true kanto true etc.
+      generations: {gen: get_game_versions(item_name:$def_item, item: item)}, # table has col that is bool for each gen i.e. honnen true kanto true etc.
       short_effect: get_short_effect(item_name:$def_item, item: item)
     }
   end
