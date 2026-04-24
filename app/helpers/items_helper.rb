@@ -4,7 +4,7 @@ require 'json'
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
   $item_endpoint = "https://pokeapi.co/api/v2/item/"
-  $items = nil
+  $items = self.get_all_items()
   
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
@@ -25,7 +25,6 @@ module ItemsHelper
     end
     return nil if parsed_res.blank? || parsed_res.empty?
     $items = parsed_res
-    return true unless $items.blank? || $items.empty?
   end
 
   def print_all_items
