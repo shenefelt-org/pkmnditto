@@ -36,7 +36,7 @@ module ItemsHelper
 
   # Get the flavor text entries for a given item. 
   def get_flavor_text_entries(item_name=$def_item, item = nil)
-    if !item.nil? && item.is_a?(HTTParty::Response)
+    if !item.nil?
       english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
       return english unless english.nil?
     else
