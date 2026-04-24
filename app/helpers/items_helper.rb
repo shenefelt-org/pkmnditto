@@ -83,7 +83,6 @@ module ItemsHelper
       $gen_names_map = gen_name['main_region'].map { |key,value| {name: value} }
       gen_names.push(gen_name['main_region']['name']) unless gen_name.blank? || gen_name.empty?
     end
-    $gen_names_map.each_pair { |key, value| puts value }
     return gen_names unless gen_names.empty?
     return nil
   end
