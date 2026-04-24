@@ -10,12 +10,13 @@ module ItemsHelper
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
   end
 
+
   # get all items and include their sprites for display
   def get_all_items
     item_chain = HTTParty.get($item_endpoint)
     return nil if item_chain.blank? || item_chain.empty?
     parsed_res = item_chain['results'].map do |item| 
-      build_item_node(item_name: item['name'], item: item)
+      build_item_node(item: item)
     end
     return nil if parsed_res.blank? || parsed_res.empty?
     $items = parsed_res
