@@ -10,6 +10,7 @@ module ItemsHelper
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
   end
+
   # get all items and include their sprites for display
   def get_all_items
     item_chain = HTTParty.get($item_endpoint)
@@ -20,7 +21,7 @@ module ItemsHelper
         name: item['name'], 
         url: item['url'],
         sprite: item_data['sprites']['default'],
-        flavor_text: get_flavor_text_entries(item['name'])
+        flavor_text: get_flavor_text_entries($def_item, item_data)
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
@@ -33,33 +34,17 @@ module ItemsHelper
     return item.parsed_response unless item.blank?
   end
 
-  # Get the items attributes 
-  def get_item_attributes(item_name=$def_item)
-    item_attributes = get_item_by_name(item_name)
-
-    return nil if item_attributes.blank? || item_attributes['attributes'].empty?
-
-    res = item_attributes['attributes']
-    res.map 
-
-    return res
-
-  end
-
   # Get the flavor text entries for a given item. 
-  def get_flavor_text_entries(item_name=$def_item)
-    item = get_item_by_name(item_name)
-    return nil if item.blank? || item['flavor_text_entries'].empty?
-
-
-    return item['flavor_text_entries'].map do |entry|
-      lang = entry['language']['name']
-      return nil if lang != 'en'
-      {
-        text: entry["text"],
-        language_name: entry["language"]["name"]
-      }
+  def get_flavor_text_entries(item_name=$def_item, item = nil)
+    if !item.nil? && item.is_a(HTTParty::Response)
+      english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
+      return english unless english.nil?
+    else
+      item = get_item_by_name(item_name)
+      english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
+      return english unless english.nil?
     end
   end
+
 
 end
