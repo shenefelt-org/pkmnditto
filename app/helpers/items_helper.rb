@@ -44,6 +44,13 @@ module ItemsHelper
     }
   end
 
+  def display_item_node(item_node: nil)
+    return nil if item_node.nil? || item_node.empty?
+    item_node.each_pair do |key, value|
+      puts "#{key} => #{value}"
+    end
+  end
+
   def print_all_items
     $items = get_all_items() if $items.blank? || $items.empty?
     $items.each_with_index do |item, index|
