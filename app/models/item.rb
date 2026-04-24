@@ -4,11 +4,8 @@ class Item < ApplicationRecord
 
   def copy(node: nil)
     return nil if node.nil?
-    self.name = node[:name]
-    self.url = node[:url]
-    self.sprite = node[:sprite]
-    self.generations = node[:generations]
-    self.short_effect = node[:short_effect]
+    self.assign_attributes(build_item_node(node: node))
+    self.save
   end
 
 end
