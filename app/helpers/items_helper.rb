@@ -20,7 +20,8 @@ module ItemsHelper
         name: item['name'], 
         url: item['url'],
         sprite: item_data['sprites']['default'],
-        flavor_text: get_flavor_text_entries($def_item, item_data)
+        flavor_text: get_flavor_text_entries($def_item, item_data),
+        generations: get_game_versions($def_item, item_data)
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
@@ -44,6 +45,7 @@ module ItemsHelper
     item = HTTParty.get("#{$item_endpoint}#{item_name}")
     return item.parsed_response unless item.blank?
   end
+
   # Get the flavor text entries for a given item. 
   def get_flavor_text_entries(item_name=$def_item, item = nil)
     if !item.nil?
@@ -54,6 +56,19 @@ module ItemsHelper
       english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
       return english['text'] unless english.nil? || english.empty?
     end
+  end
+
+  def get_game_versions(item_name = $def_item, item = nil)
+    item = get_item_by_name(item_name) if item.nil?
+    return nil if item.blank? || item.empty?
+    gen_names = []
+    item['game_indices'].each do |key| 
+      gen_name = HTTParty.get(key['generation']['url'])
+      gen_names.push(gen_name['main_region']['name']) unless gen_name.blank? || gen_name.empty?
+    end
+
+    return gen_names unless gen_names.empty?
+    return nil
   end
 
 
