@@ -88,19 +88,7 @@ module PokemonHelper
     return pokemon['held_items'].map { |item| item['item']['name'] }
   end
 
-  # get the evolustion chain for a given pokemon 
-  def get_pokemon_evolution_chain(pokemon = $def_pkmn_request)
-    pokemon = $def_pkmn_request.parsed_response if pokemon == $def_pkmn_request
-    evolution_chain_url = pokemon['species']['url']
-    evolution_chain_res = HTTParty.get(evolution_chain_url)
-    return nil if evolution_chain_res.blank? || evolution_chain_res.empty?
-    
-    pkmn_evolution_chain = evolution_chain_res['evolution_chain']['url']
-    chain_response = HTTParty.get(pkmn_evolution_chain)
-    return nil if chain_response.blank?
-    # Parse the evolution chain starting from the root and return the evolution map
-    parse_evolutions(chain_response['chain'])
-  end
+
 
   # parse the evolution chain of a pokemon recursilvey 
   def parse_evolutions(evolution_chain)
