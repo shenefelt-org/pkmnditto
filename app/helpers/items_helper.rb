@@ -21,7 +21,8 @@ module ItemsHelper
         url: item['url'],
         sprite: item_data['sprites']['default'],
         flavor_text: get_flavor_text_entries($def_item, item_data),
-        generations: get_game_versions($def_item, item_data)
+        generations: get_game_versions($def_item, item_data),
+        short_effect: get_short_effect($def_item, item_data),
       }
     end
     return nil if parsed_res.blank? || parsed_res.empty?
@@ -31,19 +32,20 @@ module ItemsHelper
   def print_all_items
     $items = get_all_items() if $items.blank? || $items.empty?
     $items.each_with_index do |item, index|
-      exit if index >= 5 
+      exit if index >= 10 
       puts "Name: #{item[:name]}"
       puts "URL: #{item[:url]}"
       puts "Sprite: #{item[:sprite]}"
       puts "Flavor Text: #{item[:flavor_text]}"
       puts "Generations: #{item[:generations]}"
+      puts "Short Effect: #{item[:short_effect]}"
       puts "-----------------------------"
     end
     "thats all queen" # Return nil to avoid printing the array of items again in the console
   end
 
   # Get any given item by name
-  def get_item_by_name(item_name=$def_item)
+  def get_item_by_name(item_name = $def_item)
     item = HTTParty.get("#{$item_endpoint}#{item_name}")
     return item.parsed_response unless item.blank?
   end
@@ -60,6 +62,7 @@ module ItemsHelper
     end
   end
 
+  # get the versions of the game the item is in
   def get_game_versions(item_name = $def_item, item = nil)
     item = get_item_by_name(item_name) if item.nil?
     return nil if item.blank? || item.empty?
@@ -71,6 +74,14 @@ module ItemsHelper
 
     return gen_names unless gen_names.empty?
     return nil
+  end
+
+  # get the items short effect text
+  def get_short_effect(item_name = $def_name, item = nil)
+    item = get_item_by_name(item_name) if item.nil?
+    return nil if item.blank? || item.empty? || item['effect_entries'].empty?
+    effect_entry = item['effect_entries'].find {|entry| entry['language']['name'] == 'en'}
+    return (effect_entry.empty?) ? nil : effect_entry['short_effect']
   end
 
 
