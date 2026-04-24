@@ -21,6 +21,7 @@ module ItemsHelper
     $items = parsed_res
   end
 
+  # build an item node off of the parsed http response
   def build_item_node(item_name = $def_item, item = nil)
     item = get_item_by_name(item_name) if item.nil?
     return {
