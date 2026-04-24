@@ -42,8 +42,7 @@ module ItemsHelper
   # Get any given item by name
   def get_item_by_name(item_name=$def_item)
     item = HTTParty.get("#{$item_endpoint}#{item_name}")
-    return item.parsed_response unless item.blank? || item.empty? || item.success? != 200
-  end
+    return item.parsed_response unless item.blank?
 
   # Get the flavor text entries for a given item. 
   def get_flavor_text_entries(item_name=$def_item, item = nil)
