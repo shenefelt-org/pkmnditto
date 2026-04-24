@@ -4,7 +4,7 @@ class Item < ApplicationRecord
 
   def copy(node: nil)
     return nil if node.nil?
-    self.assign_attributes(build_item_node(node: node))
+    self.assign_attributes(build_item_node(item_name: node[:name]))
     self.save
   end
 
