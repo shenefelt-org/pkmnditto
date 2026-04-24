@@ -79,8 +79,8 @@ module ItemsHelper
     gen_names = []
     item['game_indices'].each do |key| 
       gen_name = HTTParty.get(key['generation']['url'])
-      return nil if gen_name.empty?
-      $gen_names_map = gen_name['main_region'].map { |key,value| {name: key, value: value} }
+      next if gen_name.blank? # don't return go to next loop ittr
+      $gen_names_map = gen_name['main_region'].map { |key| {name: key} }
       gen_names.push(gen_name['main_region']['name']) unless gen_name.blank? || gen_name.empty?
     end
     return gen_names unless gen_names.empty?
