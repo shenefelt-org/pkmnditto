@@ -110,11 +110,15 @@ module ItemsHelper
   end
 
   def search_for_item_name_input
-
+    $items = get_all_items() if $items.blank? || $items.empty?
     puts "What item are you looking for?"
     item = gets.chomp
     # parameterize converts any input with space to in-put and always downcases
-    item_call = HTTParty("#{$item_endpoint}#{item.parameterize}")
+    item = $items.find { |item| item[:name] == item.parameterize }
+
+    return item unless item.nil? || item.empty?
+    return false
+    
 
   end
 
