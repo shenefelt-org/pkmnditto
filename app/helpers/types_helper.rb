@@ -14,8 +14,9 @@ module TypesHelper
 
 
   def build_type_node(type_name: nil)
-    return nil if type_name.nil? 
+    
     type = get_type_by_name(type_name) if type_name.nil?
+    return nil if type_name.nil? 
     return nil if type.nil? 
     return {
       name: type['name'],
