@@ -8,15 +8,13 @@ module TypesHelper
     types = HTTParty.get($type_endpoint)
     return nil if types.empty? || types['results'].empty?
 
-    return types['results'].map { |type| build_type_node(type_name: type['name']) }
+    return types['results'].map { |type| build_type_node(type_url: type['name']) }
 
   end
 
 
-  def build_type_node(type_name: nil)
-    
+  def build_type_node(type_url: nil)
     type = get_type_by_name(type_name) if type_name.nil?
-    return nil if type_name.nil? 
     return nil if type.nil? 
     return {
       name: type['name'],
