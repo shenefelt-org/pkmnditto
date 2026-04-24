@@ -3,7 +3,7 @@ require 'json'
 # DEFAULT item will always be master-ball if none is passed in
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
-  $item_endpoint = "https://pokeapi.co/api/v2/item?limit=10"
+  $item_endpoint = "https://pokeapi.co/api/v2/item/"
   $items = []
   
   def validate_response(response)
