@@ -38,11 +38,11 @@ module ItemsHelper
   def get_flavor_text_entries(item_name=$def_item, item = nil)
     if !item.nil?
       english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
-      return english unless english.nil?
+      return english['text'] unless english.nil? || english.empty?
     else
       item = get_item_by_name(item_name)
       english = item['flavor_text_entries'].find { |entry| entry['language']['name'] == 'en' }
-      return english unless english.nil?
+      return english['text'] unless english.nil? || english.empty?
     end
   end
 
