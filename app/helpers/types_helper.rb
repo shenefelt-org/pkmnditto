@@ -14,9 +14,9 @@ module TypesHelper
   end
 
 
-  def build_type_node(type_url: nil)
-    type = HTTParty.get(type_url.nil? ? $default_type : type_url)
-    return nil if type.nil? 
+  def build_type_node(type_url: $default_type)
+    type = HTTParty.get(type_url)
+    return nil if type.empty? || type['name'].empty?
     return {
       name: type['name'],
       url: type['url'],
