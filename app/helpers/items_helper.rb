@@ -83,7 +83,7 @@ module ItemsHelper
       $gen_names_map << { name: gen_name['main_region']['name'], url: gen_name['main_region']['url'] }
       gen_names.push(gen_name['main_region']['name']) unless gen_name.blank? || gen_name.empty?
     end
-    return gen_names unless gen_names.empty?
+    return $gen_names_map unless gen_names.empty?
     return nil
   end
 
