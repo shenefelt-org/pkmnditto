@@ -34,8 +34,25 @@
         <ul>
           <li><%= link_to "Types", types_path %></li>
           <li><%= link_to "Items", items_path %></li>
+          <% if signed_in? %>
+            <% if current_user.profile_image_url.present? %>
+              <li><%= image_tag current_user.profile_image_url, alt: current_user.display_name, style: "width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;" %></li>
+            <% end %>
+            <li><small>Hi, <%= current_user.display_name %></small></li>
+            <li><%= link_to "Sign out", signout_path, class: "secondary" %></li>
+          <% else %>
+            <li>
+              <%= button_to "Sign in with Replit", "/auth/replit", method: :post, data: { turbo: false }, form: { style: "display:inline" }, class: "contrast" %>
+            </li>
+          <% end %>
         </ul>
       </nav>
+
+      <% flash.each do |type, msg| %>
+        <article class="<%= type == 'alert' ? 'pico-color-red-500' : '' %>" style="padding:0.5rem 1rem;">
+          <%= msg %>
+        </article>
+      <% end %>
 
       <%= yield %>
     </main>
