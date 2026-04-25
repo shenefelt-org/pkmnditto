@@ -46,7 +46,7 @@ def build_pokemon_model(pkmn: nil)
     name: pkmn[:name],
     base_exp: pkmn[:base_exp],
     pkmn_type: pkmn[:pkmn_type],
-    abilities: pkmn[:abilities].to_json,
+    abilities: pkmn[:abilities],
     default_sprite: pkmn[:default_sprite]
   )
 end
