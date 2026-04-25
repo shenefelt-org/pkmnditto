@@ -23,7 +23,7 @@ module MovesHelper
     return nil if $moves_name_url_map.nil? || $moves_name_url_map.empty?
 
     $moves_name_url_map.each do |move|
-      move_dat = get_move_by_url(move[:url])
+      move_dat = get_move_by_url(url: move[:url])
       break if move_dat.nil?
       short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
       map.push({
