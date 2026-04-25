@@ -1,7 +1,7 @@
 module MovesHelper
   $move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
-  $moves_map = nil
-  $move_nodes_map = nil
+  $moves_map = []
+  $move_nodes_map = []
 
   def build_moves_map
     map = []
@@ -13,9 +13,8 @@ module MovesHelper
   end
 
   def build_moves_node_map
-  map = []
-  $moves_map = build_moves_map() unless $moves_map.present?
-  return nil if $moves_map.nil? || $moves_map.empty?
+  $moves_map = build_moves_map() if $moves_map.blank?
+  return nil if $moves_map.blank?
 
   $moves_map.each do |move|
     $moves_node_map.push(
@@ -23,9 +22,9 @@ module MovesHelper
     )
   end
 
-  $move_nodes_map = map unless map.empty?
-  return map unless map.empty?
-  false # if we made it here we have an error we are not accounting for
+  return puts "move node map built successfully" unless $moves_node_map.empty?
+  return puts "error building move node map"
+  
   end
 
   def make_move_node(move_url: nil)
