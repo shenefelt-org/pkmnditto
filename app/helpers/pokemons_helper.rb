@@ -5,36 +5,37 @@ module PokemonsHelper
   $default_pokemon_id = 124 # pokedex id for jynx
 
 
-def get_all_pokemon_graphql
+def build_pkmn_from_graphql
   url = "https://beta.pokeapi.co/graphql/v1beta"
-
-  # We set a high limit to ensure we get every generation
+  
   query = <<~GQL
-    query getAllPokemon {
-      pokemon_v2_pokemon(limit: 2000) {
-        id
+    query getPokemonData {
+      pokemon_v2_pokemon {
+        poke_id: id
         name
-        pokemon_v2_pokemontypes {
-          pokemon_v2_type {
-            name
-          }
-        }
+        base_exp: base_experience
+        pokemon_v2_pokemontypes { pokemon_v2_type { name } }
+        pokemon_v2_pokemonabilities { pokemon_v2_ability { name } }
+        pokemon_v2_pokemonsprites { sprites }
       }
     }
   GQL
 
-  response = HTTParty.post(
-    url,
-    headers: { 'Content-Type' => 'application/json' },
-    body: { query: query }.to_json
-  )
+  response = HTTParty.post(url, headers: { 'Content-Type' => 'application/json' }, body: { query: query }.to_json)
+  raw_data = response.parsed_response['data']['pokemon_v2_pokemon']
 
-  if response.success?
-    # Access the array of pokemon
-    response.parsed_response['data']['pokemon_v2_pokemon']
-  else
-    puts "Error: #{response.code}"
-    nil
+  # Flatten the nested response to match your schema
+  raw_data.map do |pkmn|
+    {
+      poke_id:        pkmn['poke_id'],
+      name:           pkmn['name'],
+      base_exp:       pkmn['base_exp'],
+      # Join multiple types/abilities into strings or arrays
+      pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
+      abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
+      # Dig out the default sprite from the JSON blob
+      default_sprite: pkmn['pokemon_v2_pokemonsprites'][0]['sprites']['front_default']
+    }
   end
 end
 
