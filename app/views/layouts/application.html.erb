@@ -18,11 +18,26 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <%# Pico CSS — minimal classless CSS framework (https://picocss.com) %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
   </head>
 
   <body>
-    <%= yield %>
+    <main class="container">
+      <nav>
+        <ul>
+          <li><strong><%= link_to "Pkmnditto", root_path %></strong></li>
+        </ul>
+        <ul>
+          <li><%= link_to "Types", types_path %></li>
+          <li><%= link_to "Items", items_path %></li>
+        </ul>
+      </nav>
+
+      <%= yield %>
+    </main>
   </body>
 </html>
