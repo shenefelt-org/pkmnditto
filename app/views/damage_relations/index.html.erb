@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Damage relations" %>
+
+<h1>Damage relations</h1>
+
+<div id="damage_relations">
+  <% @damage_relations.each do |damage_relation| %>
+    <%= render damage_relation %>
+    <p>
+      <%= link_to "Show this damage relation", damage_relation %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New damage relation", new_damage_relation_path %>
