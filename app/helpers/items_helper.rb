@@ -13,10 +13,11 @@ module ItemsHelper
 
 
   # get all items and include their sprites for display
-  def get_all_items
-    item_chain = HTTParty.get($item_endpoint)
+  # Pulls every page from PokeAPI (default: all ~2175 items) by setting a high limit.
+  def get_all_items(limit: 5000)
+    item_chain = HTTParty.get("#{$item_endpoint}?limit=#{limit}")
     return nil if item_chain.blank? || item_chain.empty?
-    parsed_res = item_chain['results'].map do |item| 
+    parsed_res = item_chain['results'].map do |item|
       build_item_node(item_name: item['name'])
     end
     return nil if parsed_res.blank? || parsed_res.empty?
