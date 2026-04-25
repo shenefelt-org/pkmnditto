@@ -18,18 +18,40 @@
   <p><small><%= pluralize(@items.size, "result") %> for "<%= @q %>"</small></p>
 <% end %>
 
-<div id="items">
+<div id="items" class="items-grid">
   <% if @items.any? %>
     <% @items.each do |item| %>
-      <%= render item %>
-      <p>
-        <%= link_to "Show this item", item %>
-      </p>
+      <%= link_to item, id: dom_id(item), class: "item-card" do %>
+        <% if item.sprite.present? %>
+          <%= image_tag item.sprite, alt: item.name, style: "max-width: 96px" %>
+        <% end %>
+        <div><%= item.name %></div>
+      <% end %>
     <% end %>
   <% else %>
     <p><em>No items found.</em></p>
   <% end %>
 </div>
+
+<style>
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .item-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.75rem;
+    border: 1px solid var(--pico-muted-border-color, #ccc);
+    border-radius: 0.5rem;
+    text-decoration: none;
+  }
+  .item-card:hover { background: var(--pico-card-sectioning-background-color, #f5f5f5); }
+</style>
 
 <%= link_to "New item", new_item_path %>
 
