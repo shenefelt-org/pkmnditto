@@ -25,7 +25,7 @@ module MovesHelper
         url: move[:url],
         move_type: move_data['type']['name'],
         power: move_data['power'],
-        short_text: (en_short_text.empty?) ? "N.A" : en_short_text['short_effect'] 
+        short_text: (en_short_text['short_effect'].empty?) ? "N.A" : en_short_text['short_effect'] 
       })
     end
     $move_nodes_map = map unless map.empty?
