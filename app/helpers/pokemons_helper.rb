@@ -41,7 +41,7 @@ end
 
 def build_pokemon_model(pkmn: nil)
   return nil if pkmn.nil?
-  return Pokemon.new(
+  return Pokemon.create(
     poke_id: pkmn[:poke_id],
     name: pkmn[:name],
     base_exp: pkmn[:base_exp],
