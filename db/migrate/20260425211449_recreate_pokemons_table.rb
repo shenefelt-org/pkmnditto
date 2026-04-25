@@ -6,7 +6,7 @@ class RecreatePokemonsTable < ActiveRecord::Migration[8.1]
       t.string :name
       t.integer :base_exp
       t.string :pkmn_type
-      t.string :abilities, array: true, default: []
+      t.text :abilities
       t.string :default_sprite
     end
   end
