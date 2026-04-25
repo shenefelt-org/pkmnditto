@@ -1,16 +1,19 @@
-<p style="color: green"><%= notice %></p>
+<p style="color: green">
+  <%= notice %>
+</p>
 
 <% content_for :title, "Moves" %>
 
-<h1>Moves</h1>
+  <h1>Moves</h1>
 
-<div id="moves">
-  <% @moves.each do |move| %>
-    <%= render move %>
-    <p>
-      <%= link_to "Show this move", move %>
-    </p>
-  <% end %>
-</div>
+  <div id="moves">
+    <% @moves.each do |move| %>
+      <%= render move %>
+        <%= move.name %>
+          <p>
+            <%= link_to "Show this move" , move %>
+          </p>
+          <% end %>
+  </div>
 
-<%= link_to "New move", new_move_path %>
+  <%= link_to "New move" , new_move_path %>
