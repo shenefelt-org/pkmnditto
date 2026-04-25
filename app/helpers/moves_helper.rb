@@ -58,7 +58,7 @@ module MovesHelper
   end
 
   def make_move_model(move_url: nil)
-    move = make_move_node("https://pokeapi.co/api/v2/move/10016")
+    move = make_move_node(move_url: "https://pokeapi.co/api/v2/move/10016")
     return nil if move.empty?
     return Move.create(
       name: move[:name],
