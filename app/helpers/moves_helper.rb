@@ -12,7 +12,7 @@ module MovesHelper
     return map unless map.empty?
   end
 
-  def build_moves_node_map
+  def create_move_models_for_all_moves
     $moves_map = build_moves_map() if $moves_map.blank? || $moves_map.empty?
     $moves_node_map = []
     return nil if $moves_map.blank?
