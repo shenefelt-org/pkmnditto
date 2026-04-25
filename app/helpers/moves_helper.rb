@@ -1,6 +1,6 @@
 module MovesHelper
-  $move_endpoint = "https://pokeapi.co/api/v2/move/"
-  def build_items_map
+  $move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
+  def build_moves_map
     map = []
     moves = HTTParty.get($move_endpoint)
     return nil if moves.empty? || moves["results"].empty?
