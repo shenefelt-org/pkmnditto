@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_055917) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_25_211449) do
   create_table "items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "flavor_text"
@@ -32,20 +32,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_055917) do
     t.string "url"
   end
 
-  create_table "pokemon", force: :cascade do |t|
-    t.integer "base_experience"
-    t.datetime "created_at", null: false
-    t.integer "height"
-    t.string "image_url"
-    t.string "name", null: false
-    t.integer "pokeapi_id", null: false
-    t.string "primary_type"
-    t.json "raw_payload"
-    t.datetime "updated_at", null: false
-    t.integer "weight"
-    t.index ["name"], name: "index_pokemon_on_name", unique: true
-    t.index ["pokeapi_id"], name: "index_pokemon_on_pokeapi_id", unique: true
-    t.index ["primary_type"], name: "index_pokemon_on_primary_type"
+  create_table "pokemons", force: :cascade do |t|
+    t.text "abilities"
+    t.integer "base_exp"
+    t.string "default_sprite"
+    t.string "name"
+    t.string "pkmn_type"
+    t.integer "poke_id"
   end
 
   create_table "types", force: :cascade do |t|
