@@ -11,7 +11,7 @@ module MovesHelper
     return map unless map.empty?
   end
 
-  def build_moves_node
+  def build_moves_node_map
     map = []
     moves = build_moves_map() if $moves_name_url_map.nil? || $moves_name_url_map.empty?
     return nil if moves.nil? || moves.empty?
@@ -25,7 +25,7 @@ module MovesHelper
         url: move[:url],
         move_type: move_data['type']['name'],
         power: move_data['power'],
-        short_text: en_short_text['short_effect']
+        short_text: (en_short_text.empty?) ? "N.A" : en_short_text['short_effect'] 
       })
     end
     $move_nodes_map = map unless map.empty?
