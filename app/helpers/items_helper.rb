@@ -76,15 +76,13 @@ module ItemsHelper
   def get_game_versions(item_name: $def_item, item: nil)
     item = get_item_by_name(item_name) if item.empty?
     return nil if item.blank? || item.empty?
-    gen_names = []
-    item['game_indices'].each do |key| 
+    gen_regions = []
+    item['game_indices'].each do |key|
       gen_name = HTTParty.get(key['generation']['url'])
-      next if gen_name.blank? # don't return go to next loop ittr
-      $gen_names_map << { name: gen_name['main_region']['name'], url: gen_name['main_region']['url'] }
-      gen_names.push(gen_name['main_region']['name']) unless gen_name.blank? || gen_name.empty?
+      next if gen_name.blank?
+      gen_regions << { name: gen_name['main_region']['name'], url: gen_name['main_region']['url'] }
     end
-    return $gen_names_map unless gen_names.empty?
-    return nil
+    gen_regions.uniq.presence
   end
 
   # get the items short effect text
