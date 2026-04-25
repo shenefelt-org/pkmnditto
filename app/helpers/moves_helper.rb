@@ -19,28 +19,19 @@ module MovesHelper
 
   def build_moves_node_map
     map = []
-    if $moves_name_url_map.nil? || $moves_name_url_map.empty?
-      puts "building moves map..."
-      moves = build_moves_map()
-    else
-      puts "moves url map already loaded!"
-      moves = $move_name_url_map
-    end
+    $moves_name_url_map = build_moves_map() if $moves_name_url_map.nil? || $moves_name_url_map.empty?
+    return nil if $moves_name_url_map.nil? || $moves_name_url_map.empty?
 
-    return nil if moves.nil? || moves.empty?
-    puts "moves is neither nil nor empty"
-
-    moves.each do |move|
-      move_data = get_move_by_url(url: move[:url])
-      next if move_data.nil? || move_data.empty?
-      puts "building move node for #{move_data['name']}"
-      en_short_text = move_data['effect_entries'].find { |entry| entry['language']['name'] == 'en' }["short_effect"]
+    $moves_name_url_map.each do |move|
+      move_dat = get_move_by_url(move[:url])
+      break if move_dat.nil?
+      short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
       map.push({
         name: move[:name],
         url: move[:url],
-        move_type: move_data['type']['name'],
-        power: move_data['power'],
-        short_text: en_short_text
+        move_type: move_dat['type']['name'],
+        power: move_dat['power'],
+        short_text: short_effect ? short_effect['short_effect'] : "ERR"
       })
     end
     $move_nodes_map = map unless map.empty?
