@@ -4,6 +4,7 @@ class MovesController < ApplicationController
   # GET /moves or /moves.json
   def index
     @moves = Move.order(move_type: :asc)
+  end
 
   # GET /moves/1 or /moves/1.json
   def show
