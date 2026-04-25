@@ -1,0 +1,2 @@
+class InfoNode < ApplicationRecord
+end
