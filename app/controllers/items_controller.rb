@@ -65,6 +65,25 @@ class ItemsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def item_params
-      params.expect(item: [ :item_num, :name ])
+      permitted = params.expect(item: [ :name, :short_effect, :flavor_text, :sprite, :url, :generations ])
+
+      # `generations` is serialized as a JSON Hash on the model. The form sends
+      # it as a JSON string, so parse it here (or fall back to {} on bad input).
+      if permitted[:generations].is_a?(String)
+        raw = permitted[:generations].strip
+        permitted[:generations] =
+          if raw.empty?
+            {}
+          else
+            begin
+              parsed = JSON.parse(raw)
+              parsed.is_a?(Hash) ? parsed : { "value" => parsed }
+            rescue JSON::ParserError
+              { "raw" => raw }
+            end
+          end
+      end
+
+      permitted
     end
 end

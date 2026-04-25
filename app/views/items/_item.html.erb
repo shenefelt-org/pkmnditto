@@ -1,12 +1,33 @@
 <div id="<%= dom_id item %>">
   <div>
-    <strong>Item num:</strong>
-    <%= item.item_num %>
-  </div>
-
-  <div>
     <strong>Name:</strong>
     <%= item.name %>
   </div>
 
+  <div>
+    <strong>Short effect:</strong>
+    <%= item.short_effect %>
+  </div>
+
+  <div>
+    <strong>Flavor text:</strong>
+    <%= item.flavor_text %>
+  </div>
+
+  <% if item.sprite.present? %>
+    <div>
+      <strong>Sprite:</strong>
+      <%= image_tag item.sprite, alt: item.name, style: "max-width: 96px" %>
+    </div>
+  <% end %>
+
+  <div>
+    <strong>API URL:</strong>
+    <%= link_to item.url, item.url if item.url.present? %>
+  </div>
+
+  <div>
+    <strong>Generations:</strong>
+    <pre><%= JSON.pretty_generate(item.generations || {}) %></pre>
+  </div>
 </div>

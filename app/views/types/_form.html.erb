@@ -12,13 +12,13 @@
   <% end %>
 
   <div>
-    <%= form.label :type_id, style: "display: block" %>
+    <%= form.label :type_id, "Type ID" %>
     <%= form.number_field :type_id %>
   </div>
 
   <div>
-    <%= form.label :type_name, style: "display: block" %>
-    <%= form.textarea :type_name %>
+    <%= form.label :type_name %>
+    <%= form.text_area :type_name, rows: 3 %>
   </div>
 
   <div>
