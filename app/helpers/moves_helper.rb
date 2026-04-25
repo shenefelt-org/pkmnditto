@@ -40,7 +40,7 @@ module MovesHelper
         url: move[:url],
         move_type: move_data['type']['name'],
         power: move_data['power'],
-        short_text: en_short_text ?? "ERR"
+        short_text: en_short_text
       })
     end
     $move_nodes_map = map unless map.empty?
