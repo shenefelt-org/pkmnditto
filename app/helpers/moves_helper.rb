@@ -13,18 +13,16 @@ module MovesHelper
   end
 
   def build_moves_node_map
-  $moves_map = build_moves_map() if $moves_map.blank?
-  return nil if $moves_map.blank?
+    $moves_map = build_moves_map() if $moves_map.blank? || $moves_map.empty?
+    return nil if $moves_map.blank?
 
-  $moves_map.each do |move|
-    $moves_node_map.push(
-      make_move_model(move_url: move[:url])
-    )
-  end
+    $moves_map.each do |move|
+      move_node = make_move_model(move_url: move[:url])
+      $moves_node_map.push(move_node) unless move_node.nil?
+    end
 
-  return puts "move node map built successfully" unless $moves_node_map.empty?
-  return puts "error building move node map"
-  
+    return puts "move node map built successfully" unless $moves_node_map.empty?
+    return puts "error building move node map"
   end
 
   def make_move_node(move_url: nil)
