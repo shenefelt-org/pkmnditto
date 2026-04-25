@@ -26,7 +26,7 @@ def build_pkmn_from_graphql
 
   # Flatten the nested response to match your schema
   raw_data.map do |pkmn|
-    {
+    build_pokemon_model(pkmn: {
       poke_id:        pkmn['poke_id'],
       name:           pkmn['name'],
       base_exp:       pkmn['base_exp'],
@@ -35,12 +35,20 @@ def build_pkmn_from_graphql
       abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
       # Dig out the default sprite from the JSON blob
       default_sprite: pkmn['pokemon_v2_pokemonsprites'][0]['sprites']['front_default']
-    }
+    })
   end
 end
 
-def build_pokemon_node(pokemon_url: nil)
-  return nil if pokemon_url.nil?
+def build_pokemon_model(pkmn: nil)
+  return nil if pkmn.nil?
+  return Pokemon.new(
+    poke_id: pkmn[:poke_id],
+    name: pkmn[:name],
+    base_exp: pkmn[:base_exp],
+    pkmn_type: pkmn[:pkmn_type],
+    abilities: pkmn[:abilities].to_json,
+    default_sprite: pkmn[:default_sprite]
+  )
 end
 
   # get a pokemon by name we will use tangela as the default if no param
