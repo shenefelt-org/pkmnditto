@@ -10,6 +10,8 @@
     <% @moves.each do |move| %>
       <%= render move %>
         <%= move.name %>
+        <%= move.move_type %>
+        
           <p>
             <%= link_to "Show this move" , move %>
           </p>
