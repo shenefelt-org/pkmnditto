@@ -13,7 +13,12 @@ module MovesHelper
 
   def build_moves_node_map
     map = []
-    moves = build_moves_map() if $moves_name_url_map.nil? || $moves_name_url_map.empty?
+    if $moves_name_url_map.nil? || $moves_name_url_map.empty?
+      moves = build_moves_map()
+    else
+      moves = $move_name_url_map
+    end
+
     return nil if moves.nil? || moves.empty?
 
     moves.each do |move|
