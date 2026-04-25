@@ -4,19 +4,43 @@ module PokemonsHelper
   $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx').parsed_response
   $default_pokemon_id = 124 # pokedex id for jynx
 
-  def get_types
-    type_chain = HTTParty.get($type_endpoint)
-    return nil if type_chain.blank?
 
-    return type_chain["results"].map { |type| { type["name"] => type["url"] } }
-  end
+def get_all_pokemon_graphql
+  url = "https://beta.pokeapi.co/graphql/v1beta"
 
-  def get_all_pokemon
-    poke_map = {}
-    poke_chain = HTTParty.get($pokemon_all_endpoint)
-    return nil if poke_chain.blank?
-    return poke_chain["results"].map { |p| { p["name"] => p["url"] } }
+  # We set a high limit to ensure we get every generation
+  query = <<~GQL
+    query getAllPokemon {
+      pokemon_v2_pokemon(limit: 2000) {
+        id
+        name
+        pokemon_v2_pokemontypes {
+          pokemon_v2_type {
+            name
+          }
+        }
+      }
+    }
+  GQL
+
+  response = HTTParty.post(
+    url,
+    headers: { 'Content-Type' => 'application/json' },
+    body: { query: query }.to_json
+  )
+
+  if response.success?
+    # Access the array of pokemon
+    response.parsed_response['data']['pokemon_v2_pokemon']
+  else
+    puts "Error: #{response.code}"
+    nil
   end
+end
+
+def build_pokemon_node(pokemon_url: nil)
+  return nil if pokemon_url.nil?
+end
 
   # get a pokemon by name we will use tangela as the default if no param
   def get_pokemon_by_name(name = "tangela")
