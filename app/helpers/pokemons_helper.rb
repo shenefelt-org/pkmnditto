@@ -28,6 +28,7 @@ def build_pkmn_from_graphql
   raw_data = response.parsed_response['data']['pokemon_v2_pokemon']
 
   raw_data.map do |pkmn|
+    sprite = HTTParty.get("https://pokeapi.co/api/v2/pokemon")
     raw_sprites = pkmn['pokemon_v2_pokemonsprites'][0]['sprites']
     parsed_sprites = raw_sprites.is_a?(String) ? JSON.parse(raw_sprites) : raw_sprites
     
@@ -37,7 +38,7 @@ def build_pkmn_from_graphql
       base_exp:       pkmn['base_exp'],
       pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
       abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
-      default_sprite: parsed_sprites['front_default']
+      default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['die']}",
     })
   end
 end
