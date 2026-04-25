@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_24_215028) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_24_221126) do
   create_table "items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "flavor_text"
@@ -36,5 +36,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_24_215028) do
     t.index ["name"], name: "index_pokemon_on_name", unique: true
     t.index ["pokeapi_id"], name: "index_pokemon_on_pokeapi_id", unique: true
     t.index ["primary_type"], name: "index_pokemon_on_primary_type"
+  end
+
+  create_table "types", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "type_id"
+    t.text "type_name"
+    t.datetime "updated_at", null: false
   end
 end
