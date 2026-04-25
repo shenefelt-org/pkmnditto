@@ -4,7 +4,7 @@ module MovesHelper
     map = []
     moves = HTTParty.get($move_endpoint)
     return nil if moves.empty? || moves["results"].empty?
-    (1..moves['count']).each do |i|
+    (0..moves['count']).step(100) do |i|
       move = HTTParty.get("#{$move_endpoint}#{i}")
       map.push({name: move['name'], url: move['url']}) if !move.empty? && !move['name'].empty? && !move['url'].empty
     end
