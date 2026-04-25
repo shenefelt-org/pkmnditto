@@ -16,6 +16,7 @@ module MovesHelper
     return nil if url.nil?
     move_info = HTTParty.get(url)
     return nil if move_info.empty?
+    move_info
   end
 
   def make_move_node(move_url: nil)
