@@ -21,7 +21,7 @@ module MovesHelper
   def make_move_node(move_url: nil)
     return nil if move_url.nil?
     move_dat = get_move_by_url(url: move_url)
-    return nil if move_dat.empty?
+    return nil if move_dat.nil?
     short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
     return {
       name: move_dat['name'],
