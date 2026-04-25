@@ -1,2 +1,0 @@
-class InfoNode < ApplicationRecord
-end
