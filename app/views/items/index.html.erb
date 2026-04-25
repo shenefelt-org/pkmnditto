@@ -4,12 +4,30 @@
 
 <h1>Items</h1>
 
+<%= form_with url: items_path, method: :get, local: true, class: "search-form" do |f| %>
+  <div role="group">
+    <%= f.search_field :q, value: @q, placeholder: "Search items by name, effect, or flavor text…", aria: { label: "Search items" } %>
+    <%= f.submit "Search" %>
+    <% if @q.present? %>
+      <%= link_to "Clear", items_path, role: "button", class: "secondary" %>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @q.present? %>
+  <p><small><%= pluralize(@items.size, "result") %> for "<%= @q %>"</small></p>
+<% end %>
+
 <div id="items">
-  <% @items.each do |item| %>
-    <%= render item %>
-    <p>
-      <%= link_to "Show this item", item %>
-    </p>
+  <% if @items.any? %>
+    <% @items.each do |item| %>
+      <%= render item %>
+      <p>
+        <%= link_to "Show this item", item %>
+      </p>
+    <% end %>
+  <% else %>
+    <p><em>No items found.</em></p>
   <% end %>
 </div>
 

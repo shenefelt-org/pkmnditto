@@ -3,7 +3,16 @@ class ItemsController < ApplicationController
 
   # GET /items or /items.json
   def index
+    @q = params[:q].to_s.strip
     @items = Item.all
+    if @q.present?
+      term = "%#{@q.downcase}%"
+      @items = @items.where(
+        "LOWER(name) LIKE :t OR LOWER(short_effect) LIKE :t OR LOWER(flavor_text) LIKE :t",
+        t: term
+      )
+    end
+    @items = @items.order(:name)
   end
 
   # GET /items/1 or /items/1.json
