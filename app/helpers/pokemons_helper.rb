@@ -28,9 +28,6 @@ def build_pkmn_from_graphql
   raw_data = response.parsed_response['data']['pokemon_v2_pokemon']
 
   raw_data.map do |pkmn|
-    sprite = HTTParty.get("https://pokeapi.co/api/v2/pokemon")
-    raw_sprites = pkmn['pokemon_v2_pokemonsprites'][0]['sprites']
-    parsed_sprites = raw_sprites.is_a?(String) ? JSON.parse(raw_sprites) : raw_sprites
     
     build_pokemon_model(pkmn: {
       poke_id:        pkmn['poke_id'],
