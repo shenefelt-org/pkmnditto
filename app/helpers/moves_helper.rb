@@ -14,6 +14,7 @@ module MovesHelper
 
   def build_moves_node_map
     $moves_map = build_moves_map() if $moves_map.blank? || $moves_map.empty?
+    $moves_node_map = []
     return nil if $moves_map.blank?
 
     $moves_map.each do |move|
