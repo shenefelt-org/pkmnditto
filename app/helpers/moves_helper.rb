@@ -19,7 +19,7 @@ module MovesHelper
 
   $moves_map.each do |move|
     $moves_node_map.push(
-      make_move_node(move_url: move[:url])
+      make_move_model(move_url: move[:url])
     )
   end
 
