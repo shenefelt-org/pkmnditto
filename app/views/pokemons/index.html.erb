@@ -1,23 +1,59 @@
+<p style="color: green"><%= notice %></p>
+
 <% content_for :title, "Pokemon" %>
 
 <h1>Pokemon</h1>
 
-<p><%= link_to "New pokemon", new_pokemon_path, class: "secondary" %></p>
-
-<% if @pokemons.any? %>
-  <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem;">
-    <% @pokemons.each do |pokemon| %>
-      <article style="text-align:center; padding:0.75rem; margin:0;">
-        <% if pokemon.image_url.present? %>
-          <%= image_tag pokemon.image_url, alt: pokemon.name, style: "width:72px;height:72px;image-rendering:pixelated;" %>
-        <% end %>
-        <div><%= link_to pokemon.name.titleize, pokemon %></div>
-        <% if pokemon.primary_type.present? %>
-          <small><%= pokemon.primary_type %></small>
-        <% end %>
-      </article>
+<%= form_with url: pokemons_path, method: :get, local: true, class: "search-form" do |f| %>
+  <div role="group">
+    <%= f.search_field :q, value: @q, placeholder: "Search pokemon by name, type, or ability…", aria: { label: "Search pokemon" } %>
+    <%= f.submit "Search" %>
+    <% if @q.present? %>
+      <%= link_to "Clear", pokemons_path, role: "button", class: "secondary" %>
     <% end %>
   </div>
-<% else %>
-  <p>No pokemon yet. <%= link_to "Add one", new_pokemon_path %>.</p>
 <% end %>
+
+<% if @q.present? %>
+  <p><small><%= pluralize(@pokemons.size, "result") %> for "<%= @q %>"</small></p>
+<% end %>
+
+<div id="pokemons" class="pokemons-grid">
+  <% if @pokemons.any? %>
+    <% @pokemons.each do |pokemon| %>
+      <%= link_to pokemon, id: dom_id(pokemon), class: "pokemon-card" do %>
+        <% if pokemon.default_sprite.present? %>
+          <%= image_tag pokemon.default_sprite, alt: pokemon.name, style: "max-width: 96px; image-rendering: pixelated;" %>
+        <% end %>
+        <div><%= pokemon.name.to_s.titleize %></div>
+        <% if pokemon.poke_id.present? %>
+          <small>#<%= pokemon.poke_id %></small>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <p><em>No pokemon found.</em></p>
+  <% end %>
+</div>
+
+<style>
+  .pokemons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .pokemon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.75rem;
+    border: 1px solid var(--pico-muted-border-color, #ccc);
+    border-radius: 0.5rem;
+    text-decoration: none;
+  }
+  .pokemon-card:hover { background: var(--pico-card-sectioning-background-color, #f5f5f5); }
+</style>
+
+<%= link_to "New pokemon", new_pokemon_path %>

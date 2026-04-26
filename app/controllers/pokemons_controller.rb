@@ -3,7 +3,16 @@ class PokemonsController < ApplicationController
 
   # GET /pokemons
   def index
-    @pokemons = Pokemon.ordered_by_pokedex
+    @q = params[:q].to_s.strip
+    @pokemons = Pokemon.all
+    if @q.present?
+      term = "%#{@q.downcase}%"
+      @pokemons = @pokemons.where(
+        "LOWER(name) LIKE :t OR LOWER(pkmn_type) LIKE :t OR LOWER(abilities) LIKE :t",
+        t: term
+      )
+    end
+    @pokemons = @pokemons.ordered_by_pokedex
   end
 
   # GET /pokemons/1
@@ -12,7 +21,7 @@ class PokemonsController < ApplicationController
 
   # GET /pokemons/new
   def new
-    @pokemon = Pokemon.new(nil)
+    @pokemon = Pokemon.new
   end
 
   # GET /pokemons/1/edit
@@ -21,8 +30,7 @@ class PokemonsController < ApplicationController
 
   # POST /pokemons
   def create
-    @pokemon = Pokemon.new(nil)
-    @pokemon.assign_attributes(pokemon_params)
+    @pokemon = Pokemon.new(pokemon_params)
 
     if @pokemon.save
       redirect_to @pokemon, notice: "Pokemon was successfully created."
@@ -53,6 +61,25 @@ class PokemonsController < ApplicationController
   end
 
   def pokemon_params
-    params.expect(pokemon: [ :name, :pokeapi_id, :primary_type, :height, :weight, :base_experience, :image_url ])
+    permitted = params.expect(pokemon: [ :poke_id, :name, :base_exp, :pkmn_type, :default_sprite, :abilities ])
+
+    # `abilities` is serialized as a JSON Array on the model. The form sends a
+    # newline- or comma-separated string, so normalize it here.
+    if permitted[:abilities].is_a?(String)
+      raw = permitted[:abilities].strip
+      permitted[:abilities] =
+        if raw.empty?
+          []
+        else
+          begin
+            parsed = JSON.parse(raw)
+            parsed.is_a?(Array) ? parsed : [parsed.to_s]
+          rescue JSON::ParserError
+            raw.split(/[\n,]+/).map(&:strip).reject(&:empty?)
+          end
+        end
+    end
+
+    permitted
   end
 end

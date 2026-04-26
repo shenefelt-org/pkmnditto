@@ -1,49 +1,50 @@
 <%= form_with(model: pokemon) do |form| %>
   <% if pokemon.errors.any? %>
-    <article style="border:1px solid var(--pico-color-red-500);">
-      <h4><%= pluralize(pokemon.errors.count, "error") %> prohibited this pokemon from being saved:</h4>
+    <div style="color: red">
+      <h2><%= pluralize(pokemon.errors.count, "error") %> prohibited this pokemon from being saved:</h2>
+
       <ul>
         <% pokemon.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
       </ul>
-    </article>
+    </div>
   <% end %>
 
-  <label>
-    Name
-    <%= form.text_field :name, required: true %>
-  </label>
-
-  <label>
-    PokeAPI ID
-    <%= form.number_field :pokeapi_id, required: true, min: 1 %>
-  </label>
-
-  <label>
-    Primary type
-    <%= form.text_field :primary_type %>
-  </label>
-
-  <label>
-    Image URL
-    <%= form.text_field :image_url %>
-  </label>
-
-  <div class="grid">
-    <label>
-      Height
-      <%= form.number_field :height, min: 1 %>
-    </label>
-    <label>
-      Weight
-      <%= form.number_field :weight, min: 1 %>
-    </label>
-    <label>
-      Base experience
-      <%= form.number_field :base_experience, min: 0 %>
-    </label>
+  <div>
+    <%= form.label :name %>
+    <%= form.text_field :name %>
   </div>
 
-  <%= form.submit %>
+  <div>
+    <%= form.label :poke_id, "Pokédex ID" %>
+    <%= form.number_field :poke_id, min: 1 %>
+  </div>
+
+  <div>
+    <%= form.label :pkmn_type, "Type" %>
+    <%= form.text_field :pkmn_type, placeholder: "e.g. fire, water, grass" %>
+  </div>
+
+  <div>
+    <%= form.label :base_exp, "Base experience" %>
+    <%= form.number_field :base_exp, min: 0 %>
+  </div>
+
+  <div>
+    <%= form.label :default_sprite, "Sprite URL" %>
+    <%= form.url_field :default_sprite %>
+  </div>
+
+  <div>
+    <%= form.label :abilities, "Abilities (one per line, or JSON array)" %>
+    <%= form.text_area :abilities,
+        value: (pokemon.abilities.is_a?(Array) ? pokemon.abilities.join("\n") : pokemon.abilities.to_s),
+        rows: 4,
+        placeholder: "overgrow\nchlorophyll" %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
 <% end %>

@@ -1,25 +1,10 @@
-<% content_for :title, @pokemon.name.titleize %>
+<p style="color: green"><%= notice %></p>
 
-<p><%= link_to "← Back to pokemon", pokemons_path %></p>
+<%= render @pokemon %>
 
-<article>
-  <header style="text-align:center;">
-    <% if @pokemon.image_url.present? %>
-      <%= image_tag @pokemon.image_url, alt: @pokemon.name, style: "width:144px;height:144px;image-rendering:pixelated;" %>
-    <% end %>
-    <h1 style="margin:0;"><%= @pokemon.name.titleize %></h1>
-    <small>#<%= @pokemon.pokeapi_id %></small>
-  </header>
+<div>
+  <%= link_to "Edit this pokemon", edit_pokemon_path(@pokemon) %> |
+  <%= link_to "Back to pokemon", pokemons_path %>
 
-  <ul>
-    <li><strong>Primary type:</strong> <%= @pokemon.primary_type.presence || "—" %></li>
-    <li><strong>Height:</strong> <%= @pokemon.height.presence || "—" %></li>
-    <li><strong>Weight:</strong> <%= @pokemon.weight.presence || "—" %></li>
-    <li><strong>Base experience:</strong> <%= @pokemon.base_experience.presence || "—" %></li>
-  </ul>
-
-  <footer>
-    <%= link_to "Edit", edit_pokemon_path(@pokemon), class: "secondary" %>
-    <%= button_to "Delete", @pokemon, method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "contrast", form: { style: "display:inline" } %>
-  </footer>
-</article>
+  <%= button_to "Destroy this pokemon", @pokemon, method: :delete %>
+</div>
