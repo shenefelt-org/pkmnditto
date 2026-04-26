@@ -39,7 +39,7 @@ def build_pkmn_from_graphql
     })
   end
 end
-
+    
 # build a pokemon model for the db from the graph ql call above
 # this is used to build a model for ALL pokemon in the api.
 def build_pokemon_model(pkmn: nil)

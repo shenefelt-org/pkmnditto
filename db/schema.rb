@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_222418) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_26_043751) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -53,10 +53,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_222418) do
   end
 
   create_table "types", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.integer "type_id"
-    t.text "type_name"
-    t.datetime "updated_at", null: false
+    t.string "name"
+    t.string "url"
+    t.index ["name"], name: "index_types_on_name", unique: true
+    t.index ["url"], name: "index_types_on_url", unique: true
   end
 
   create_table "users", force: :cascade do |t|

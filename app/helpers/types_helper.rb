@@ -10,20 +10,17 @@ module TypesHelper
     types = HTTParty.get($type_endpoint)
     return nil if types.empty? || types['results'].empty?
 
-    return types['results'].map { |type| build_type_node(type_url: type['name']) }
+    return types['results'].map { |type| build_type_node(type_hash: type) }
 
   end
 
 
-  def build_type_node(type_url: $default_type)
-    type = HTTParty.get(type_url)
-    return nil if type.empty? || type['name'].empty?
-    return {
-      name: type['name'],
-      url: type['url'],
-      # store an array of hashes
-      damage_relations: [ get_damage_relations(type_url: type_url) ]
-    } 
+  def build_type_node(type_hash: nil)
+    return nil if type_hash.nil? || type_hash.blank?
+    return Type.create({
+      name: type_hash['name'],
+      url: type_hash['url'],
+    }) 
 
   end
 
