@@ -10,9 +10,6 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-<<<<<<< HEAD
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_025729) do
-=======
 ActiveRecord::Schema[8.1].define(version: 2026_04_25_222418) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -25,7 +22,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_222418) do
     t.datetime "updated_at", null: false
   end
 
->>>>>>> e213196b618118f459ee84023c3c40615d385612
   create_table "items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "flavor_text"
