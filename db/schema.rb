@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_26_043751) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_26_190731) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -50,6 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_043751) do
     t.string "name"
     t.string "pkmn_type"
     t.integer "poke_id"
+    t.index ["name"], name: "index_pokemons_on_name", unique: true
   end
 
   create_table "types", force: :cascade do |t|

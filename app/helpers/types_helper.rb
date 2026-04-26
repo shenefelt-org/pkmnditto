@@ -6,21 +6,21 @@ module TypesHelper
   $types = []
   
   # also have this built a map that maps the name to the id of hte type
-  def get_all_types
+  def build_types_from_restapi
     types = HTTParty.get($type_endpoint)
     return nil if types.empty? || types['results'].empty?
 
-    return types['results'].map { |type| build_type_node(type_hash: type) }
+    return types['results'].each { |type| build_type_model(type_hash: type) }
 
   end
 
 
-  def build_type_node(type_hash: nil)
+  def build_type_model(type_hash: nil)
     return nil if type_hash.nil? || type_hash.blank?
-    return Type.create({
+    return Type.create(
       name: type_hash['name'],
       url: type_hash['url'],
-    }) 
+    ) 
 
   end
 
