@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resources :types
   resources :items
+  resources :pokemons
 
   # Replit Auth (OpenID Connect) routes — OmniAuth middleware handles POST /auth/replit
   match "/auth/replit/callback", to: "sessions#create",  via: [:get, :post], as: :auth_replit_callback

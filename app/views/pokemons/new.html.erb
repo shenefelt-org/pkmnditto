@@ -1,0 +1,7 @@
+<% content_for :title, "New pokemon" %>
+
+<p><%= link_to "← Back to pokemon", pokemons_path %></p>
+
+<h1>New pokemon</h1>
+
+<%= render "form", pokemon: @pokemon %>

@@ -34,6 +34,7 @@
         <ul>
           <li><%= link_to "Types", types_path %></li>
           <li><%= link_to "Items", items_path %></li>
+          <li><%= link_to "Pokemon", pokemons_path %></li>
           <% if signed_in? %>
             <% if current_user.profile_image_url.present? %>
               <li><%= image_tag current_user.profile_image_url, alt: current_user.display_name, style: "width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;" %></li>
