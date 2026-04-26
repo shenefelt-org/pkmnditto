@@ -250,6 +250,9 @@ GEM
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
+    pg (1.6.3-x86_64-linux)
+    postgresql (1.0.0)
+      pg
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -451,6 +454,7 @@ DEPENDENCIES
   omniauth (~> 2.1)
   omniauth-rails_csrf_protection (~> 1.0)
   omniauth_openid_connect (~> 0.8)
+  postgresql
   propshaft
   puma (>= 5.0)
   rails (~> 8.1.3)
