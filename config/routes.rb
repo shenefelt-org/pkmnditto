@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :damage_relations
+  resources :moves
   resources :types
   resources :items
   resources :pokemons

@@ -10,7 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema[8.1].define(version: 2026_04_25_025729) do
+=======
+ActiveRecord::Schema[8.1].define(version: 2026_04_25_222418) do
+  create_table "damage_relations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "double_damage_from"
+    t.text "double_damage_to"
+    t.text "half_damage_from"
+    t.text "half_damage_to"
+    t.text "no_damage_from"
+    t.text "no_damage_to"
+    t.datetime "updated_at", null: false
+  end
+
+>>>>>>> e213196b618118f459ee84023c3c40615d385612
   create_table "items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "flavor_text"
@@ -22,20 +37,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_025729) do
     t.string "url"
   end
 
-  create_table "pokemon", force: :cascade do |t|
-    t.integer "base_experience"
+  create_table "moves", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.integer "height"
-    t.string "image_url"
-    t.string "name", null: false
-    t.integer "pokeapi_id", null: false
-    t.string "primary_type"
-    t.json "raw_payload"
+    t.string "move_type"
+    t.string "name"
+    t.integer "power"
+    t.string "short_text"
     t.datetime "updated_at", null: false
-    t.integer "weight"
-    t.index ["name"], name: "index_pokemon_on_name", unique: true
-    t.index ["pokeapi_id"], name: "index_pokemon_on_pokeapi_id", unique: true
-    t.index ["primary_type"], name: "index_pokemon_on_primary_type"
+    t.string "url"
+  end
+
+  create_table "pokemons", force: :cascade do |t|
+    t.text "abilities"
+    t.integer "base_exp"
+    t.string "default_sprite"
+    t.string "name"
+    t.string "pkmn_type"
+    t.integer "poke_id"
   end
 
   create_table "types", force: :cascade do |t|

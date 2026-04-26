@@ -1,0 +1,17 @@
+<%= form_with(model: damage_relation) do |form| %>
+  <% if damage_relation.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(damage_relation.errors.count, "error") %> prohibited this damage_relation from being saved:</h2>
+
+      <ul>
+        <% damage_relation.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

@@ -1,121 +1,59 @@
 require 'httparty'
 require 'json'
 module PokemonsHelper
-  $default_pokemon = HTTParty.get('https://pokeapi.co/api/v2/pokemon/jynx').parsed_response
-  $default_pokemon_id = 124 # pokedex id for jynx
 
-  def get_types
-    type_chain = HTTParty.get($type_endpoint)
-    return nil if type_chain.blank?
+  # gets pokemon data for every pokemon and creates and stores a model in the db for each one
+  # DO NOT RUN without dumping the curent db 
+  # TODO add uniq constraint on pokemon name to remove the above worry
+def build_pkmn_from_graphql
+  url = "https://beta.pokeapi.co/graphql/v1beta"
+  
+  query = <<~GQL
+    query getPokemonData {
+      pokemon_v2_pokemon {
+        poke_id: id
+        name
+        base_exp: base_experience
+        pokemon_v2_pokemontypes { pokemon_v2_type { name } }
+        pokemon_v2_pokemonabilities { pokemon_v2_ability { name } }
+        pokemon_v2_pokemonsprites { sprites }
+      }
+    }
+  GQL
 
-    return type_chain["results"].map { |type| { type["name"] => type["url"] } }
-  end
+  response = HTTParty.post(url, headers: { 'Content-Type' => 'application/json' }, body: { query: query }.to_json)
+  
+  return nil unless response.success?
+  
+  raw_data = response.parsed_response['data']['pokemon_v2_pokemon']
 
-  def get_all_pokemon
-    poke_map = {}
-    poke_chain = HTTParty.get($pokemon_all_endpoint)
-    return nil if poke_chain.blank?
-    return poke_chain["results"].map { |p| { p["name"] => p["url"] } }
-  end
-
-  # get a pokemon by name we will use tangela as the default if no param
-  def get_pokemon_by_name(name = "tangela")
-    puts "You asked for #{name}" unless name == "tangela" 
-    puts "No name provided, defaulting to ur mom" if name == "tangela"
-    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{name.downcase}")
-    p_data = response.parsed_response #httparty alows us to get the parsed response as a ruby hash.
-
+  raw_data.map do |pkmn|
     
-    return p_data unless p_data.blank? 
-
-    
-  end
-
-  # by default get info for tangela note lets make these build pokemon objects for the application
-  def get_pokemon_by_poke_id(id = $default_pokemon_id)
-    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{id}")
-    p_data = response.parsed_response
-    return p_data if !p_data.empty? 
-
-    puts "No pokemon found with id #{id}"
-    nil
-
-  end
-
-  def get_pokemon_by_type(type = 'fairy')
-    type_response = HTTParty.get("https://pokeapi.co/api/v2/type/#{type.downcase}")
-
-    return type_response.parsed_response unless type_response.empty? || type_response.blank?
-
-    nil
-
-  end
-
-  def get_pokemon_names_by_type(type = 'fairy')
-    type_response = get_pokemon_by_type(type)
-    return nil if type_response.blank?
-    
-    return type_response['pokemon'].map { |p| p['pokemon']['name'] }
-  end
-
-
-  # get a pokemons abiiltes
-  def get_pokemon_abilities(pokemon = $default_pokemon)
-    abilities = pokemon['abilities']
-    return nil if abilities.blank?
-
-    return abilities.map { |ability| ability['ability']['name'] } 
-  end
-
-
-  def get_pokemon_weaknesses(pokemon = $default_pokemon)
-    $type_map = get_types if $type_map.empty?
-    type_url = pokemon['types'][0]['type']['url']
-    res = HTTParty.get(type_url)
-    return nil if res.blank? || res['damage_relations'].blank?
-    return res['damage_relations']['take_damage_from'].map { |weakness| weakness['name'] }
-  end
-
-  # grab main pokemon sprite
-  def get_pokemon_artwork(pokemon = $default_pokemon, sprite_choice = 'front_default')
-    sprite_image_choices = ['front_default', 'front_shiny', 'back_default', 'back_shiny']
-    return nil unless sprite_image_choices.include?(sprite_choice)
-    puts pokemon['sprites']['other']['home'][sprite_choice]
-  end
-
-  # get items a pokem is holding if there are any.
-  def get_held_items(pokemon = $default_pokemon)
-    return nil if pokemon['held_items'].blank? || pokemon['held_items'].empty?
-
-    return pokemon['held_items'].map { |item| item['item']['name'] }
-  end
-
-  # get the evolustion chain for a given pokemon 
-  def get_pokemon_evolution_chain(pokemon = $default_pokemon)
-    evolution_chain_url = pokemon['species']['url']
-    evolution_chain_res = HTTParty.get(evolution_chain_url)
-    return nil if evolution_chain_res.blank? || evolution_chain_res.empty?
-    
-    pkmn_evolution_chain = evolution_chain_res['evolution_chain']['url']
-    chain_response = HTTParty.get(pkmn_evolution_chain)
-    return nil if chain_response.blank?
-    # Parse the evolution chain starting from the root and return the evolution map
-    parse_evolutions(chain_response['chain'])
-  end
-
-  def parse_evolutions(evolution_chain)
-    evolition_map = { evolution_chain['species']['name'] => [] }
-    evolution_chain['evolves_to'].each do |evolution|
-      evolition_map[evolution_chain['species']['name']] << parse_evolutions(evolution)
-    end
-    evolition_map
+    build_pokemon_model(pkmn: {
+      poke_id:        pkmn['poke_id'],
+      name:           pkmn['name'],
+      base_exp:       pkmn['base_exp'],
+      pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
+      abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
+      default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
+    })
   end
 end
 
+# build a pokemon model for the db from the graph ql call above
+# this is used to build a model for ALL pokemon in the api.
+def build_pokemon_model(pkmn: nil)
+  return nil if pkmn.nil?
+  return Pokemon.create(
+    poke_id: pkmn[:poke_id],
+    name: pkmn[:name],
+    base_exp: pkmn[:base_exp],
+    pkmn_type: pkmn[:pkmn_type],
+    abilities: pkmn[:abilities],
+    default_sprite: pkmn[:default_sprite]
+  )
+end
 
-=begin
-run all methods as test with the default pokemon (jynx)
-no param needed as default pokemon is passed in as def
-=end
+end
 
 

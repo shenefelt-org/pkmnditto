@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @damage_relation %>
+
+<div>
+  <%= link_to "Edit this damage relation", edit_damage_relation_path(@damage_relation) %> |
+  <%= link_to "Back to damage relations", damage_relations_path %>
+
+  <%= button_to "Destroy this damage relation", @damage_relation, method: :delete %>
+</div>
