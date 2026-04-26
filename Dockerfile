@@ -39,6 +39,20 @@ RUN SECRET_KEY_BASE_DUMMY=1 REPL_ID=docker-build REPLIT_DEV_DOMAIN=localhost bun
 
 FROM base
 
+ARG IMAGE_CREATED
+ARG IMAGE_REVISION
+ARG IMAGE_VERSION=latest
+ARG IMAGE_SOURCE=https://github.com/shenefelt-org/pkmnditto
+ARG IMAGE_URL=https://github.com/shenefelt-org/pkmnditto
+
+LABEL org.opencontainers.image.title="pkmnditto" \
+    org.opencontainers.image.description="Container image for the pkmnditto Rails application" \
+    org.opencontainers.image.url="${IMAGE_URL}" \
+    org.opencontainers.image.source="${IMAGE_SOURCE}" \
+    org.opencontainers.image.revision="${IMAGE_REVISION}" \
+    org.opencontainers.image.created="${IMAGE_CREATED}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}"
+
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
 
