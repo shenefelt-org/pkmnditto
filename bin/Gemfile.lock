@@ -1,0 +1,12 @@
+GEM
+  specs:
+    pg (1.6.3-x86_64-linux)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  pg
+
+BUNDLED WITH
+   2.4.19

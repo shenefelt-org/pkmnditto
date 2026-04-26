@@ -1,0 +1,7 @@
+<% content_for :title, "Edit pokemon" %>
+
+<p><%= link_to "← Back", @pokemon %></p>
+
+<h1>Edit <%= @pokemon.name.titleize %></h1>
+
+<%= render "form", pokemon: @pokemon %>

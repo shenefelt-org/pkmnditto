@@ -4,24 +4,80 @@ require 'json'
 module ItemsHelper
   $def_item = "https://pokeapi.co/api/v2/item/master-ball"
   $item_endpoint = "https://pokeapi.co/api/v2/item/"
+  $graphql_endpoint = "https://beta.pokeapi.co/graphql/v1beta"
   $items = []
   $gen_names_map = []
-  
+
   def validate_response(response)
     return nil if response.blank? || response.empty? || response.success? != 200 || response.body.parsed_response.empty?
   end
 
 
-  # get all items and include their sprites for display
-  # Pulls every page from PokeAPI (default: all ~2175 items) by setting a high limit.
+  # Get all items via the PokeAPI GraphQL endpoint in a single request.
+  # Returns an array of item-node hashes shaped the same as `build_item_node`,
+  # so this is a drop-in replacement for the old REST loop.
   def get_all_items(limit: 5000)
-    item_chain = HTTParty.get("#{$item_endpoint}?limit=#{limit}")
-    return nil if item_chain.blank? || item_chain.empty?
-    parsed_res = item_chain['results'].map do |item|
-      build_item_node(item_name: item['name'])
-    end
-    return nil if parsed_res.blank? || parsed_res.empty?
-    $items = parsed_res
+    query = <<~GQL
+      query AllItems($limit: Int!) {
+        pokemon_v2_item(limit: $limit, order_by: {name: asc}) {
+          name
+          pokemon_v2_itemsprites { sprites }
+          pokemon_v2_itemflavortexts(where: {pokemon_v2_language: {name: {_eq: "en"}}}) {
+            flavor_text
+            pokemon_v2_versiongroup {
+              name
+              pokemon_v2_versions { name }
+            }
+          }
+          pokemon_v2_itemeffecttexts(where: {pokemon_v2_language: {name: {_eq: "en"}}}) {
+            short_effect
+          }
+        }
+      }
+    GQL
+
+    response = HTTParty.post(
+      $graphql_endpoint,
+      headers: { "Content-Type" => "application/json" },
+      body:    { query: query, variables: { limit: limit } }.to_json
+    )
+    return nil if response.blank? || response.code != 200
+
+    payload = response.parsed_response
+    return nil if payload.blank? || payload["data"].blank?
+
+    rows = payload.dig("data", "pokemon_v2_item") || []
+    return nil if rows.empty?
+
+    $items = rows.map { |row| graphql_row_to_item_node(row) }
+  end
+
+  # Convert one row from the GraphQL response into the same node shape
+  # produced by `build_item_node` (name/url/sprite/flavor_text/generations/short_effect).
+  def graphql_row_to_item_node(row)
+    name = row["name"]
+
+    # Sprites can come back as a JSON string or an already-parsed hash.
+    raw_sprites = row.dig("pokemon_v2_itemsprites", 0, "sprites")
+    sprites = raw_sprites.is_a?(String) ? (JSON.parse(raw_sprites) rescue {}) : (raw_sprites || {})
+    sprite  = sprites["default"]
+
+    flavor_entries = row["pokemon_v2_itemflavortexts"] || []
+    flavor_text    = flavor_entries.first&.dig("flavor_text")
+
+    versions = flavor_entries.map { |fe| fe.dig("pokemon_v2_versiongroup", "name") }.compact.uniq
+    generations = { gen: versions.map { |vg_name| { name: vg_name, url: nil } } }
+
+    short_effect = row.dig("pokemon_v2_itemeffecttexts", 0, "short_effect")
+
+    {
+      name: name,
+      url: "#{$item_endpoint}#{name}",
+      sprite: sprite,
+      flavor_text: flavor_text,
+      generations: generations,
+      short_effect: short_effect
+    }
   end
 
   # build an item node off of the parsed http response

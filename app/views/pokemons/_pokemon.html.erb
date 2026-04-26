@@ -1,0 +1,42 @@
+<div id="<%= dom_id pokemon %>">
+  <div>
+    <strong>Name:</strong>
+    <%= pokemon.name.to_s.titleize %>
+  </div>
+
+  <div>
+    <strong>Pokédex ID:</strong>
+    <%= pokemon.poke_id %>
+  </div>
+
+  <div>
+    <strong>Type:</strong>
+    <%= pokemon.pkmn_type %>
+  </div>
+
+  <div>
+    <strong>Base experience:</strong>
+    <%= pokemon.base_exp %>
+  </div>
+
+  <div>
+    <strong>Abilities:</strong>
+    <% abilities = Array(pokemon.abilities) %>
+    <% if abilities.any? %>
+      <ul>
+        <% abilities.each do |ability| %>
+          <li><%= ability %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      —
+    <% end %>
+  </div>
+
+  <% if pokemon.default_sprite.present? %>
+    <div>
+      <strong>Sprite:</strong>
+      <%= image_tag pokemon.default_sprite, alt: pokemon.name, style: "max-width: 144px; image-rendering: pixelated;" %>
+    </div>
+  <% end %>
+</div>

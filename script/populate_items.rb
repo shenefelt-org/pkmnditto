@@ -1,32 +1,32 @@
 include ItemsHelper
 
 started = Time.now
-puts "[#{started}] Fetching item index from PokeAPI..."
+puts "[#{started}] Fetching all items via GraphQL..."
 
-list = HTTParty.get("#{$item_endpoint}?limit=5000")
-names = list["results"].map { |r| r["name"] }
-puts "[#{Time.now}] Got #{names.size} items. Beginning population..."
+nodes = get_all_items(limit: 5000)
+abort "GraphQL fetch returned nothing" if nodes.blank?
+
+puts "[#{Time.now}] Got #{nodes.size} items. Saving to DB..."
 
 ok = 0
 fail = 0
-names.each_with_index do |name, i|
+nodes.each_with_index do |node, i|
   begin
-    node = build_item_node(item_name: name)
-    item = Item.find_or_initialize_by(name: name)
+    item = Item.find_or_initialize_by(name: node[:name])
     if item.copy(node: node)
       ok += 1
     else
       fail += 1
-      puts "  ! save failed for #{name}: #{item.errors.full_messages.join(', ')}"
+      puts "  ! save failed for #{node[:name]}: #{item.errors.full_messages.join(', ')}"
     end
   rescue => e
     fail += 1
-    puts "  ! exception for #{name}: #{e.class}: #{e.message}"
+    puts "  ! exception for #{node[:name]}: #{e.class}: #{e.message}"
   end
 
-  if (i + 1) % 50 == 0 || i == names.size - 1
+  if (i + 1) % 200 == 0 || i == nodes.size - 1
     elapsed = (Time.now - started).to_i
-    puts "[#{Time.now}] progress: #{i + 1}/#{names.size}  ok=#{ok}  fail=#{fail}  elapsed=#{elapsed}s  db_count=#{Item.count}"
+    puts "[#{Time.now}] progress: #{i + 1}/#{nodes.size}  ok=#{ok}  fail=#{fail}  elapsed=#{elapsed}s  db_count=#{Item.count}"
   end
 end
 
