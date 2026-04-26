@@ -36,3 +36,4 @@ docker run --rm --name pkmnditto-test -p 3000:80 `
 Open <http://localhost:3000>
 
 
+l
