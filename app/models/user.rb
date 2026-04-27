@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   validates :sub, presence: true, uniqueness: true
 
-  # Create or update a user from the OIDC ID-token claims returned by Replit Auth.
+  # Create or update a user from OIDC ID-token claims.
   def self.upsert_from_claims(claims)
     sub = claims[:sub] || claims["sub"]
     return nil if sub.blank?
@@ -16,6 +16,6 @@ class User < ApplicationRecord
   end
 
   def display_name
-    [first_name, last_name].compact.reject(&:blank?).join(" ").presence || email.presence || "Replit user"
+    [first_name, last_name].compact.reject(&:blank?).join(" ").presence || email.presence || "User"
   end
 end
