@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-repo_url=
-revision="$(git rev-parse --short=12 HEAD)"
-created="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-version="$revision"
-
 docker build \
   --build-arg IMAGE_SOURCE="https://github.com/shenefelt-org/pkmnditto" \
   --build-arg IMAGE_URL="https://github.com/shenefelt-org/pkmnditto" \
