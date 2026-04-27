@@ -21,10 +21,10 @@ module DamageRelationsHelper
     return nil if type_url.nil? 
     type_chain = HTTParty.get(type_url)
     return nil if type_chain.blank?
-    damage_relation = DamageRelation.new
+    damage_relation = DamageRelation.create
 
     type_chain['damage_relations']['half_damage_to'].map do |r|
-      damage_relation.half_damage_to  r["name"]
+      damage_relation.half_damage_to  << r["name"]
     end
 
     type_chain['damage_relations']['half_damage_from'].each do |type|
