@@ -11,10 +11,5 @@ module DamageRelationsHelper
     types.each do |type|
       chain = HTTParty.get("https://pokeapi.co/api/v2/damage-relations #{type.name}")
     end
-
-  end
-
-  def get damage_relations(name: nil)
-
   end
 end
