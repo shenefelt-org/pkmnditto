@@ -10,10 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_26_190731) do
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_catalog.plpgsql"
-
+ActiveRecord::Schema[8.1].define(version: 2026_04_27_165106) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -23,6 +20,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_26_190731) do
     t.text "no_damage_from"
     t.text "no_damage_to"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "docs", force: :cascade do |t|
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.string "name"
+    t.string "permalink"
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_docs_on_name", unique: true
   end
 
   create_table "items", force: :cascade do |t|
