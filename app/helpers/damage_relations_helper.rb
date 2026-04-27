@@ -18,7 +18,7 @@ module DamageRelationsHelper
 
   # Parse out each relation type & then set them on the model 
   def build_damage_relations_model(type_url: nil)
-    return nil if type.nil? 
+    return nil if type_url.nil? 
     type_chain = HTTParty.get(type_url)
     return nil if type_chain.blank?
     damage_relation = DamageRelation.new
