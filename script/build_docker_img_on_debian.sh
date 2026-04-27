@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 
 repo_url="https://github.com/shenefelt-org/pkmnditto"
 revision="$(git rev-parse --short=12 HEAD)"
@@ -16,7 +15,6 @@ docker build \
   -t ghcr.io/shenefelt-org/pkmnditto:latest \
   .
 
-echo "Build succeeded. Pushing ghcr.io/shenefelt-org/pkmnditto:latest ..."
+
 docker push ghcr.io/shenefelt-org/pkmnditto:latest
 
-echo "Push succeeded. Revision: $revision"
