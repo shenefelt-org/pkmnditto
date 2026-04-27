@@ -1,2 +1,2 @@
-GET 'https://pokeapi.co/api/v2/pokemon/31'
+GET https://pokeapi.co/api/v2/evolution-chain/{id}/
 Accept: application/json

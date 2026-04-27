@@ -10,6 +10,8 @@ From the project root:
 docker build -t pkmnditto:latest .
 ```
 
+The repository scripts can also tag and push `ghcr.io/shenefelt-org/pkmnditto:latest`, but `docker pull` will only work if that GHCR package has actually been published and your client has access to it.
+
 ```powershell copy
 docker build -t pkmnditto:latest .
 $env:SECRET_KEY_BASE = (Get-Content .env | Select-String "^SECRET_KEY_BASE=").ToString().Split("=")[1]
@@ -18,6 +20,9 @@ $env:SECRET_KEY_BASE = (Get-Content .env | Select-String "^SECRET_KEY_BASE=").To
 ## 2) Run Locally In Docker (Client Machine)
 
 The app needs RAILS_MASTER_KEY at runtime.
+
+If you built the image locally, run `pkmnditto:latest`.
+If you want to pull from GHCR instead, publish the package first or authenticate with `docker login ghcr.io` and then use `ghcr.io/shenefelt-org/pkmnditto:latest`.
 
 ### PowerShell example
 
@@ -34,6 +39,3 @@ docker run --rm --name pkmnditto-test -p 3000:80 `
 ```
 
 Open <http://localhost:3000>
-
-
-l
