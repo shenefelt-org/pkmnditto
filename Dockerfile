@@ -35,7 +35,7 @@ COPY . .
 RUN sed -i 's/\r$//' bin/* && chmod +x bin/*
 
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
-RUN SECRET_KEY_BASE_DUMMY=1 REPL_ID=docker-build REPLIT_DEV_DOMAIN=localhost bundle exec rails assets:precompile
+RUN SECRET_KEY_BASE=1 REPL_ID=docker-build REPLIT_DEV_DOMAIN=localhost bundle exec rails assets:precompile
 
 FROM base
 
