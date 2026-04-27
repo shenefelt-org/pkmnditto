@@ -24,7 +24,7 @@ module DamageRelationsHelper
     damage_relation = DamageRelation.new
 
     type_chain['damage_relations']['half_damage_to'].map do |r|
-      damage_relation.half_damage_to << r["name"]
+      damage_relation.half_damage_to  r["name"]
     end
 
     type_chain['damage_relations']['half_damage_from'].each do |type|
