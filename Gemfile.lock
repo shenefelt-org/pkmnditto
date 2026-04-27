@@ -251,6 +251,7 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.6.3-x86_64-linux)
+    poke-api-v2 (0.1.1)
     postgresql (1.0.0)
       pg
     pp (0.6.3)
@@ -454,6 +455,7 @@ DEPENDENCIES
   omniauth (~> 2.1)
   omniauth-rails_csrf_protection (~> 1.0)
   omniauth_openid_connect (~> 0.8)
+  poke-api-v2
   postgresql
   propshaft
   puma (>= 5.0)
