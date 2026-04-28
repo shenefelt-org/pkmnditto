@@ -70,32 +70,32 @@ module MovesHelper
   end
 
 def get_learned_by(pokemon_id: nil)
-    return nil if pokemon_id.nil?
+  return nil if pokemon_id.nil?
     
-    # Fetch the specific Pokémon
-    res = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pokemon_id}")
-    return nil if res.blank? || res["moves"].blank?
-    pkmn = Pokemon.find_by(poke_id: pokemon_id)
+  # Fetch the specific Pokémon
+  res = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pokemon_id}")
+  return nil if res.blank? || res["moves"].blank?
+  pkmn = Pokemon.find_by(poke_id: pokemon_id)
 
-    pokemon_moves = []
+  pokemon_moves = []
 
-    res["moves"].each do |move_entry|
+  res["moves"].each do |move_entry|
       # 1. Dig the name and level
-      name = move_entry.dig("move", "name")
-      level = move_entry.dig("version_group_details", 0, "level_learned_at")
+    name = move_entry.dig("move", "name")
+    level = move_entry.dig("version_group_details", 0, "level_learned_at")
       
       # 2. Check if the move already exists in your DB to save time/API calls
-      move_node = Move.find_by(name: name)
+    move_node = Move.find_by(name: name)
 
       # 3. If it doesn't exist, use your existing logic to fetch detail and create it
-      if move_node.nil?
-        move_url = move_entry.dig("move", "url")
-        move_node = make_move_model(move_url: move_url)
-      end
+    if move_node.nil?
+      move_url = move_entry.dig("move", "url")
+      move_node = make_move_model(move_url: move_url)
+    end
 
       # 4. Optional: If you want to track the level, you'd handle that here
       # (Requires a join table like PokemonMove)
-      pokemon_moves << { move: move_node, level: level }
+    pokemon_moves << { move: move_node, level: level }
     end
 
     pokemon_moves.each do |pm|
@@ -103,7 +103,8 @@ def get_learned_by(pokemon_id: nil)
       return nil if move.empty?
       pkmn.moves << move
     true
-  end
+    end
+end
   
 
 end
