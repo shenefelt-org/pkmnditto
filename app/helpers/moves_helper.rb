@@ -69,6 +69,7 @@ module MovesHelper
     
   end
 
+  
 def get_learned_by(pokemon_id: nil)
   return nil if pokemon_id.nil?
     
@@ -103,6 +104,23 @@ def get_learned_by(pokemon_id: nil)
       pkmn.moves << move
     end
 end
+
+def move_weaknesses(move_name: nil)
+  return nil if move_name.nil?
+  move = Move.find_by(name: move_name)
+  return unless move
+  move_type = move.move_type
+  type = Type.find_by(name: move_type)
+  return nil unless type
+  damage_relation = DamageRelation.find_by(type_id: type.id)
+  return nil unless damage_relation
+
+  # Get the types that are weak to this move's type
+  weaknesses = damage_relation.double_damage_to
+  return weaknesses unless weaknesses.empty?
+  return nil
+end
+  
   
 
 end
