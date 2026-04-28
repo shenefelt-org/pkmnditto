@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_27_165106) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_28_160756) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -52,6 +52,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_27_165106) do
     t.string "url"
   end
 
+  create_table "pokemon_moves", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "move_id", null: false
+    t.integer "pokemon_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["move_id"], name: "index_pokemon_moves_on_move_id"
+    t.index ["pokemon_id"], name: "index_pokemon_moves_on_pokemon_id"
+  end
+
   create_table "pokemons", force: :cascade do |t|
     t.text "abilities"
     t.integer "base_exp"
@@ -79,4 +88,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_27_165106) do
     t.datetime "updated_at", null: false
     t.index ["sub"], name: "index_users_on_sub", unique: true
   end
+
+  add_foreign_key "pokemon_moves", "moves"
+  add_foreign_key "pokemon_moves", "pokemons"
 end
