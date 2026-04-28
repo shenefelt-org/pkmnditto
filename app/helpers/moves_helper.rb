@@ -69,8 +69,14 @@ module MovesHelper
     
   end
 
-  def get_learned_by(pokemon: nil)
-    pokemon.each_with_index { |p, index| puts pokemon.dig("learned_by_pokemon", index, "name") }
+  def get_learned_by(pokemon_id: nil)
+    return nil if pokemon_is.nil?
+    res = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pokemon_id}")
+    return nil if res.empty? || res["moves"].empty?
+
+    res["moves"].each do |move_entry|
+      puts move_entry.dig("move", "name")
+    end
   end
   
 
