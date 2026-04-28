@@ -55,17 +55,18 @@ def build_pokemon_model(pkmn: nil)
 end
 
 def get_pokemon_cries
-  pkmn = Pokemon.all
+  pkmn = Pokemon.all 
+  pkmn = build_pkmn_from_graphql() if pkmn.blank?
   return nil if pkmn.blank?
 
-  pkmn.each do |poke| 
-    puts "Getting #{poke.name}..."
+  pkmn.each_with_index do |poke, index| 
+    puts "#{index} Getting #{poke.name} cries..."
     p = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{poke.id}") 
 
-   poke.cries = [{
+   poke.update(cries: [{
       legacy: p.dig("cries", "legacy"),
       latest: p.dig("cries", "latest")
-    }]
+    }])
 
   end
 end
