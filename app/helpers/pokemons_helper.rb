@@ -59,6 +59,7 @@ def get_pokemon_cries
   return nil if pkmn.blank?
 
   pkmn.each do |poke| 
+    puts "Getting #{poke.name}..."
     p = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{poke.id}") 
 
    poke.cries = [{
