@@ -75,7 +75,7 @@ def get_learned_by(pokemon_id: nil)
     # Fetch the specific Pokémon
     res = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pokemon_id}")
     return nil if res.blank? || res["moves"].blank?
-    pkmn = Pokemon.where(poke_id: pokemon_id)
+    pkmn = Pokemon.find_by(poke_id: pokemon_id)
 
     pokemon_moves = []
 
