@@ -23,11 +23,11 @@ module DamageRelationsHelper
     return nil if type_chain.blank?
     damage_relation = DamageRelation.create
 
-    damage_relation.half_damage_to = type_chain['damage_relations']['half_damage_to'].map do |r|
-       r["name"]
+    damage_relation.half_damage_to = type_chain['damage_relations']['half_damage_to'].map do |type|
+       type["name"]
     end
 
-    damage_relation.half_damage_from = type_chain['damage_relations']['half_damage_from'].each do |type|
+    damage_relation.half_damage_from = type_chain['damage_relations']['half_damage_from'].map do |type|
        type["name"]
     end
 
@@ -42,6 +42,7 @@ module DamageRelationsHelper
     damage_relation.no_damage_to = type_chain['damage_relations']['no_damage_to'].map do |type|
       type["name"]
     end
+
     damage_relation.no_damage_from = type_chain['damage_relations']['no_damage_from'].map do |type|
       type["name"]
     end
