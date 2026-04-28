@@ -100,7 +100,7 @@ def get_learned_by(pokemon_id: nil)
 
     pokemon_moves.each do |pm|
       move = Move.find_by(name: pm[:move].name)
-      return nil if move.empty?
+      return nil if move.nil?
       pkmn.moves << move
     true
     end
