@@ -77,6 +77,8 @@ module MovesHelper
     res["moves"].each do |move_entry|
       puts move_entry.dig("move", "name")
     end
+
+    return true
   end
   
 
