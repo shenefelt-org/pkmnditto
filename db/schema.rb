@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_28_160756) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_28_163937) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -42,6 +42,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_160756) do
     t.string "url"
   end
 
+  create_table "move_learned_bies", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "move_id", null: false
+    t.integer "pokemon_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["move_id"], name: "index_move_learned_bies_on_move_id"
+    t.index ["pokemon_id"], name: "index_move_learned_bies_on_pokemon_id"
+  end
+
   create_table "moves", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "move_type"
@@ -64,6 +73,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_160756) do
   create_table "pokemons", force: :cascade do |t|
     t.text "abilities"
     t.integer "base_exp"
+    t.string "cries"
     t.string "default_sprite"
     t.string "name"
     t.string "pkmn_type"
@@ -89,6 +99,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_160756) do
     t.index ["sub"], name: "index_users_on_sub", unique: true
   end
 
+  add_foreign_key "move_learned_bies", "moves"
+  add_foreign_key "move_learned_bies", "pokemons"
   add_foreign_key "pokemon_moves", "moves"
   add_foreign_key "pokemon_moves", "pokemons"
 end
