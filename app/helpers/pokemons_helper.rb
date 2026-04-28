@@ -54,6 +54,18 @@ def build_pokemon_model(pkmn: nil)
   )
 end
 
+# Find a pokemons damage relations (this will be done by active record in the application)
+def find_damage_relations(pkmn: nil)
+  return nil if pkmn.nil?
+  types = pkmn.pkmn_type.split(', ')
+  damage_relations = []
+  types.each do |type|
+    damage_relations.push(DamageRelation.find_by(type: type))
+  end
+
+  return damage_relations
+end
+
 end
 
 

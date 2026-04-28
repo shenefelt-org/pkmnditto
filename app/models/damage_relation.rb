@@ -5,4 +5,6 @@ class DamageRelation < ApplicationRecord
   serialize :double_damage_from, coder: JSON
   serialize :no_damage_to, coder: JSON
   serialize :no_damage_from, coder: JSON
+
+  
 end
