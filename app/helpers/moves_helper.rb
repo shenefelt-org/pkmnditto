@@ -93,16 +93,14 @@ def get_learned_by(pokemon_id: nil)
       move_node = make_move_model(move_url: move_url)
     end
 
-      # 4. Optional: If you want to track the level, you'd handle that here
-      # (Requires a join table like PokemonMove)
     pokemon_moves << { move: move_node, level: level }
     end
 
+    return false if pokemon_moves.empty?
     pokemon_moves.each do |pm|
       move = Move.find_by(name: pm[:move].name)
       return nil if move.nil?
       pkmn.moves << move
-    true
     end
 end
   
