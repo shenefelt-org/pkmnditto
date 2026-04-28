@@ -69,4 +69,9 @@ module MovesHelper
     
   end
 
+  def get_learned_by(pokemon: nil)
+    temp.each_with_index { |p, index| puts temp.dig("learned_by_pokemon", index, "name") }
+  end
+  
+
 end
