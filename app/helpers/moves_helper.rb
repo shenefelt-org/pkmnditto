@@ -70,7 +70,7 @@ module MovesHelper
   end
 
   def get_learned_by(pokemon_id: nil)
-    return nil if pokemon_is.nil?
+    return nil if pokemon_id.nil?
     res = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pokemon_id}")
     return nil if res.empty? || res["moves"].empty?
 
