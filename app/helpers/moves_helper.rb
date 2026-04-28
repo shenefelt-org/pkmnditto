@@ -96,10 +96,10 @@ def get_learned_by(pokemon_id: nil)
       # 4. Optional: If you want to track the level, you'd handle that here
       # (Requires a join table like PokemonMove)
       pokemon_moves << { move: move_node, level: level }
-      pmkn.moves << move_node unless pkmn.moves.include?(move_node) # Associate the move with the Pokémon if not already associated
+      pmkn.moves << pokemon_moves unless pkmn.moves.include?(move_node) # Associate the move with the Pokémon if not already associated
     end
 
-    return pokemon_moves
+    true
   end
   
 
