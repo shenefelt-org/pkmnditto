@@ -54,6 +54,21 @@ def build_pokemon_model(pkmn: nil)
   )
 end
 
+def get_pokemon_cries
+  pkmn = Pokemon.all
+  return nil if pkmn.blank?
+
+  pkmn.each do |poke| 
+    p = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{poke.id}") 
+
+   poke.cries = [{
+      legacy: p.dig("cries", "legacy"),
+      latest: p.dig("cries", "latest")
+    }]
+
+  end
+end
+
 # Find a pokemons damage relations (this will be done by active record in the application)
 def find_damage_relations(pkmn: nil)
   return nil if pkmn.nil?
