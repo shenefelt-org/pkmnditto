@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pokemon: MyString
+  references: MyString
+  move: MyString
+  references: MyString
+
+two:
+  pokemon: MyString
+  references: MyString
+  move: MyString
+  references: MyString
