@@ -98,8 +98,10 @@ def get_learned_by(pokemon_id: nil)
       pokemon_moves << { move: move_node, level: level }
     end
 
-    pkmn.moves << pokemon_moves # Associate the move with the Pokémon if not already associated
-
+    pokemon_moves.each do |pm|
+      move = Move.find_by(name: pm[:move].name)
+      return nil if move.empty?
+      pkmn.moves << move
     true
   end
   
