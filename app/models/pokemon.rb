@@ -4,5 +4,4 @@ class Pokemon < ApplicationRecord
   has_many :pokemon_moves
   has_many :moves, through: :pokemon_moves # define m:m relationship
   has_many :types
-  has_many :type_weakness, through: 
 end
