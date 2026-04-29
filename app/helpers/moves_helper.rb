@@ -120,7 +120,8 @@ def move_weaknesses(move_name: nil)
   return weaknesses unless weaknesses.empty?
   return nil
 end
-  
+
+
   
 
 end

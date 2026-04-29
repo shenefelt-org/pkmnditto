@@ -59,7 +59,11 @@ module TypesHelper
     return half_damage unless half_damage.empty?
   end
 
-  
+  def add_type_id(type: nil)
+    return nil if type.nil?
+  end
+
+  end
 
 
 end
