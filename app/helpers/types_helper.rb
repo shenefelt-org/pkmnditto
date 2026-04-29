@@ -59,5 +59,7 @@ module TypesHelper
     return half_damage unless half_damage.empty?
   end
 
+  
+
 
 end
