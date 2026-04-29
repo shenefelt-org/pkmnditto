@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_28_202456) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_29_190641) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -19,7 +19,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_202456) do
     t.text "half_damage_to"
     t.text "no_damage_from"
     t.text "no_damage_to"
+    t.integer "type_id"
     t.datetime "updated_at", null: false
+    t.index ["type_id"], name: "index_damage_relations_on_type_id"
   end
 
   create_table "docs", force: :cascade do |t|
@@ -66,8 +68,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_202456) do
     t.string "name"
     t.integer "power"
     t.string "short_text"
+    t.integer "type_id"
     t.datetime "updated_at", null: false
     t.string "url"
+    t.index ["type_id"], name: "index_moves_on_type_id"
   end
 
   create_table "pokemon_moves", force: :cascade do |t|
@@ -108,10 +112,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_28_202456) do
     t.index ["sub"], name: "index_users_on_sub", unique: true
   end
 
+  add_foreign_key "damage_relations", "types"
   add_foreign_key "move_learned_bies", "moves"
   add_foreign_key "move_learned_bies", "pokemons"
   add_foreign_key "move_weaknesses", "moves"
   add_foreign_key "move_weaknesses", "types"
+  add_foreign_key "moves", "types"
   add_foreign_key "pokemon_moves", "moves"
   add_foreign_key "pokemon_moves", "pokemons"
 end
