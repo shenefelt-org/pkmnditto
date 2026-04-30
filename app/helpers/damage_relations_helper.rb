@@ -23,7 +23,7 @@ module DamageRelationsHelper
     return nil if type_chain.blank?
     damage_relation = DamageRelation.create
 
-    damage_relation
+    damage_relation.type_name = type.name
 
     damage_relation.half_damage_to = type_chain['damage_relations']['half_damage_to'].map do |type|
        type["name"]
