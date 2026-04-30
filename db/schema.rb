@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_29_190641) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_29_221042) do
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "double_damage_from"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_29_190641) do
     t.text "no_damage_from"
     t.text "no_damage_to"
     t.integer "type_id"
+    t.string "type_name"
     t.datetime "updated_at", null: false
     t.index ["type_id"], name: "index_damage_relations_on_type_id"
   end
