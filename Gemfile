@@ -72,3 +72,7 @@ group :test do
   gem "selenium-webdriver"
 end
 gem 'tty'
+gem 'tty-prompt'
+gem 'tty-progressbar'
+gem 'tty-table'
+gem 'pastel'

@@ -431,6 +431,7 @@ DEPENDENCIES
   jbuilder
   json
   kamal
+  pastel
   poke-api-v2
   postgresql
   propshaft
@@ -445,6 +446,9 @@ DEPENDENCIES
   stimulus-rails
   thruster
   tty
+  tty-progressbar
+  tty-prompt
+  tty-table
   turbo-rails
   tzinfo-data
   web-console
