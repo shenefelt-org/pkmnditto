@@ -1,7 +1,28 @@
+# temp fix for tty table err
+# Add this BEFORE any TTY requires
+unless defined?(Fixnum)
+  Fixnum = Integer
+end
+
+unless defined?(Bignum)
+  Bignum = Integer
+end
+
+require 'tty'
+require 'tty-prompt'
+require 'tty-progressbar'
+require "pastel"
+
 module MovesHelper
   $move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
   $moves_map = []
   $move_nodes_map = []
+  $pastel = Pastel.new
+  format = "#{$pastel.green("Destroying Pokemon.. ")} [ :bar ] :percent | Elapsed: :elapsed | ETA: :eta "
+  $bar = TTY::ProgressBar.new(format, total: Move.count, complete: "°", incomplete: " ")
+  $prompt = TTY::Prompt.new
+
+
 
   def build_moves_map
     map = []
@@ -15,15 +36,22 @@ module MovesHelper
   def build_moves_from_restapi
     $moves_map = build_moves_map() if $moves_map.blank? || $moves_map.empty?
     $moves_node_map = []
+    
     return nil if $moves_map.blank?
 
     $moves_map.each do |move|
       move_node = make_move_model(move_url: move[:url])
+      $prompt.say("Success Move Model created for #{move_node.name}", color: :blue, style: :italic) unless move_node.nil?
       $moves_node_map.push(move_node) unless move_node.nil?
+      sleep(0.1)
+      $bar.advance
     end
 
-    return puts "move node map built successfully" unless $moves_node_map.empty?
-    return puts "error building move node map"
+    $bar.finish()
+    $bar.reset()
+    $prompt.say("-> Success! Move node map built successfully!", color: :magenta, style: :italic) unless $moves_node_map.empty?
+    $prompt.say("-> Failure! Node Map Failed To Build..", color: :red, style: :italic) if $moves_node_map.empty?
+    return $moves_node_map unless $moves_node_map.empty?
   end
 
   def make_move_node(move_url: nil)
@@ -31,6 +59,7 @@ module MovesHelper
     move_dat = get_move_by_url(url: move_url)
     return nil if move_dat.empty?
     short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
+    $prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
     return {
       name: move_dat['name'],
       url: move_url,
@@ -38,12 +67,15 @@ module MovesHelper
       power: move_dat['power'] ||= 'data_not available from the pokeapi',
       short_text: short_effect ? short_effect['short_effect'] : "ERR"
     }
+
   end
 
   def get_move_by_url(url: nil)
     return nil if url.nil?
+    $prompt.say("Fetching move data from url: #{url}", color: :yellow)
     move_info = HTTParty.get(url)
     return nil if move_info.empty?
+    $prompt.say("Success featched move data from url: #{url}", color: :green)
     move_info
   end
 
