@@ -1,3 +1,18 @@
+# temp fix for tty table err
+# Add this BEFORE any TTY requires
+unless defined?(Fixnum)
+  Fixnum = Integer
+end
+
+unless defined?(Bignum)
+  Bignum = Integer
+end
+
+require 'tty'
+require 'tty-prompt'
+require 'tty-progressbar'
+require "pastel"
+
 # this will always run when trying to populate as to avoid importing data from the api that is already stored. if there is already data in the table users will need to confirm they want
 # to dump the table.
 include PokemonsHelper
