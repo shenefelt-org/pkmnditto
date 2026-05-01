@@ -57,7 +57,7 @@ module MovesHelper
 
       move_types = Type.find_by(name: move_datum['type']['name'])
 
-      model = Move.create!(
+      model = Move.create(
         name: move["name"].split("-").join(" "), # this just puts the moves name if it doesnt have a hyphen
         url: move["url"],
         move_type: move_datum['type']['name'],
