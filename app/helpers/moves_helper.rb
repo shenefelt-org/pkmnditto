@@ -18,56 +18,83 @@ module MovesHelper
   $moves_map = []
   $move_nodes_map = []
   $pastel = Pastel.new
-  format = "#{$pastel.green("Destroying Pokemon.. ")} [ :bar ] :percent | Elapsed: :elapsed | ETA: :eta "
-  $bar = TTY::ProgressBar.new(format, total: Move.count, complete: "°", incomplete: " ")
+  format = "Loading #{$pastel.bright_red("Loading moves..")} [:bar] :percent"
+  options = {
+    total: Move.count,
+    width: 40,
+    complete: $pastel.black.on_green("."),
+    incomplete: $pastel.bright_red.on_black(" "),
+    clear: true
+  }
+  $bar = TTY::ProgressBar.new(format, options)
   $prompt = TTY::Prompt.new
 
-
-
-  def build_moves_map
-    map = []
-    moves = HTTParty.get($move_endpoint)
-    return nil if moves.empty? || moves["results"].empty?
-    moves["results"].map { |move| map.push({name: move['name'], url: move['url']}) }
-    $moves_map = map unless map.empty?
-    return map unless map.empty?
-  end
-
-  def build_moves_from_restapi
-    $moves_map = build_moves_map() if $moves_map.blank? || $moves_map.empty?
-    $moves_node_map = []
-    
-    return nil if $moves_map.blank?
-
-    $moves_map.each do |move|
-      move_node = make_move_model(move_url: move[:url])
-      $prompt.say("Success Move Model created for #{move_node.name}", color: :blue, style: :italic) unless move_node.nil?
-      $moves_node_map.push(move_node) unless move_node.nil?
-      sleep(0.1)
-      $bar.advance
-    end
-
+  def reset_bar()
     $bar.finish()
     $bar.reset()
-    $prompt.say("-> Success! Move node map built successfully!", color: :magenta, style: :italic) unless $moves_node_map.empty?
-    $prompt.say("-> Failure! Node Map Failed To Build..", color: :red, style: :italic) if $moves_node_map.empty?
-    return $moves_node_map unless $moves_node_map.empty?
   end
 
-  def make_move_node(move_url: nil)
+  # Build the tables and their relations
+  def build_moves_from_restapi
+    move_count = Move.count
+    build_success = false
+
+    # check for records and offer destruction before rebuild 
+    if !move_count.zero?
+      $prompt.say("Err there are #{move_count} records in the DB", color: :red)
+      destroy = $prompt.ask("Do you want to clear the records?", default: "n")
+      destroy = destroy.downcase
+
+
+    end 
+
+    moves = HTTParty.get($move_endpoint)
+    return nil if moves.empty? || moves["results"].empty?
+
+    moves["results"].each do |move| 
+      move_datum = HTTParty.get(move["url"])
+      short_txt = move_datum['effect_entries'].find { |e| e['language']['name'] == 'en'}
+
+      move_types = Type.find_by(name: move_datum['type']['name'])
+
+      model = Move.create!(
+        name: move["name"].split("-").join(" "), # this just puts the moves name if it doesnt have a hyphen
+        url: move["url"],
+        move_type: move_datum['type']['name'],
+        power: move_datum['power'] ||= 'data not available',
+        short_text: short_txt['short_effect'] ||= 'ERR NO DATA',
+        type_id: move_types.id ||= nil
+      )
+      return nil if model.nil?
+
+      $prompt.say("Success created model for #{model.name}", color: :cyan)
+      sleep(0.1)
+      $bar.advance()
+    end
+
+    move_count = Move.count
+    reset_bar()
+
+    $prompt.say("Success! Moves Table has been built!", color: :magenta) if !move_count.zero?
+    $prompt.say("Failure! Moves Table failed to build!", color: :cyan) if move_count.zero?
+
+    return (Move.count.zero?) ? false : true
+  end
+
+  def make_move_model(move_url: nil)
     return nil if move_url.nil?
     move_dat = get_move_by_url(url: move_url)
     return nil if move_dat.empty?
     short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
     $prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
-    return {
+
+    return Model.create(
       name: move_dat['name'],
       url: move_url,
       move_type: move_dat['type']['name'],
       power: move_dat['power'] ||= 'data_not available from the pokeapi',
       short_text: short_effect ? short_effect['short_effect'] : "ERR"
-    }
-
+    )
   end
 
   def get_move_by_url(url: nil)
@@ -87,19 +114,6 @@ module MovesHelper
     false # if we make it here no move was found by that name
   end
 
-  def make_move_model(move_url: nil)
-    move = make_move_node(move_url: move_url)
-    return nil if move.empty?
-    return Move.create(
-      name: move[:name],
-      url: move_url,
-      move_type: move[:move_type],
-      power: move[:power] ||= 'data_not available from the pokeapi',
-      short_text: move[:short_text]
-    )
-
-    
-  end
 
   
 def get_learned_by(pokemon_id: nil)
