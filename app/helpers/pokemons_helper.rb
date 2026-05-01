@@ -1,11 +1,27 @@
+unless defined?(Fixnum)
+  Fixnum = Integer
+end
+
+unless defined?(Bignum)
+  Bignum = Integer
+end
+
 require 'httparty'
 require 'json'
+require 'tty'
+require 'tty-prompt'
+require 'tty-progressbar'
+require 'pastel'
 module PokemonsHelper
 
   # gets pokemon data for every pokemon and creates and stores a model in the db for each one
   # DO NOT RUN without dumping the curent db 
   # TODO add uniq constraint on pokemon name to remove the above worry
 def build_pkmn_from_graphql
+  pastel = Pastel.new
+
+  prompt = TTY::Prompt.new
+  
   url = "https://beta.pokeapi.co/graphql/v1beta"
   
   query = <<~GQL
@@ -27,17 +43,41 @@ def build_pkmn_from_graphql
   
   raw_data = response.parsed_response['data']['pokemon_v2_pokemon']
 
+  bar_options = {
+    total: raw_data.length,
+    width: 40,
+    complete: $pastel.black.on_green("&"),
+    incomplete: $pastel.bright_red.on_black("*"),
+    clear: true
+  }
+
+  format = "#{pastel.bright_red("Parsing :name")} [:bar] :percent | :itteration"
+  bar = TTY::ProgressBar.new(format, bar_options)
+
   raw_data.map do |pkmn|
     
-    build_pokemon_model(pkmn: {
-      poke_id:        pkmn['poke_id'],
-      name:           pkmn['name'],
-      base_exp:       pkmn['base_exp'],
-      pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
-      abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
-      default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
-    })
+    # pokemon = Pokemon.create(
+    #   poke_id:        pkmn['poke_id'],
+    #   name:           pkmn['name'],
+    #   base_exp:       pkmn['base_exp'],
+    #   pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
+    #   abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
+    #   default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
+    # )
+    prompt.say("#{pastel.bright_red.on_blue("Failure creating #{pkmn['name']}")}") if pokemon.empty?
+
+    # build_pokemon_model(pkmn: {
+    #   poke_id:        pkmn['poke_id'],
+    #   name:           pkmn['name'],
+    #   base_exp:       pkmn['base_exp'],
+    #   pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
+    #   abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
+    #   default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
+    # })
+
+    bar.advance(1, name: pkmn['name'])
   end
+
 end
     
 # build a pokemon model for the db from the graph ql call above
@@ -54,7 +94,7 @@ def build_pokemon_model(pkmn: nil)
   )
 end
 
-def get_pokemon_cries
+def get_pokemon_cries(poke: nil)
   pkmn = Pokemon.all 
   pkmn = build_pkmn_from_graphql() if pkmn.blank?
   return nil if pkmn.blank?
