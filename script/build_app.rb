@@ -47,7 +47,7 @@ def destroy_db()
   bar = TTY::ProgressBar.new(format, bar_options)
   methods = [Pokemon, Type, Move, DamageRelation]
 
-  bar.iterate(methods).each do |model|
+  bar.iterate(methods) do |model|
     bar.update(name: model.name.ljust(20))
     model.destroy_all
     sleep(0.1)
