@@ -86,6 +86,13 @@ prompt.say(
 )
 
 
+prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Assigning Leanred Moves..')}"
+)
+assign_learned_moves() unless Move.count.zero? || Pokemon.count.zero?
+prompt.say(
+  "#{pastel.bold.bright_magenta.on_black((PokemonMove.count.zero?) ? 'ERR' : 'Success Assigned Move Relations')}"
+)
 
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Damage Relations Table..')}"
@@ -96,13 +103,7 @@ prompt.say(
   "#{(pastel.bold.bright_magenta.on_black(!relations_count.zero?) ? 'Success Damage Relations Table Built!' : 'fail')}"
 )
 
-prompt.say(
-  "#{pastel.bold.bright_blue.on_black('Assining Leanred Moves..')}"
-)
-assign_learned_moves() unless Move.count.zero? || Pokemon.count.zero?
-prompt.say(
-  "#{pastel.bold.bright_magenta.on_black((PokemonMove.count.zero?) ? 'ERR' : 'Success Assigned Move Relations')}"
-)
+
 
 
 

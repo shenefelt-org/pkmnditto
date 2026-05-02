@@ -35,60 +35,75 @@ module MovesHelper
   end
 
   # Build the tables and their relations
-  def build_moves_from_restapi
-    move_count = Move.count
-    # check for records and offer destruction before rebuild Parsing melmetal-gmax [&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&**] 94% Failure creating rillaboom-gmax
-    if !move_count.zero?
-      $prompt.say("Err there are #{move_count} records in the DB", color: :red)
-      destroy = $prompt.ask("Do you want to clear the records?", default: "n")
-      destroy = destroy.downcase
+def build_moves_from_restapi
+  move_count = Move.count
 
-
-    end 
-
-    moves = HTTParty.get($move_endpoint)
-    return nil if moves.empty? || moves["results"].empty?
-
-    moves["results"].each do |move| 
-      move_datum = HTTParty.get(move["url"])
-      short_txt = move_datum['effect_entries'].find { |e| e['language']['name'] == 'en'}
-
-      move_types = Type.find_by(name: move_datum['type']['name'])
-
-      model = Move.create(
-        name: move["name"].split("-").join(" "), # this just puts the moves name if it doesnt have a hyphen
-        url: move["url"],
-        move_type: move_datum['type']['name'],
-        power: move_datum['power'] ||= 'data not available',
-        short_text: short_txt['short_effect'] ||= 'ERR NO DATA',
-      )
-      return nil if model.nil?
-
-      pokemon = nil
-
-      move_datum["learned_by_pokemon"].each do |ld|
-        pokemon = Pokemon.find_by(name: ld["name"])
-        next if pokemon.nil?
-
-        PokemonMove.create(
-          pokemon_id: pokemon.poke_id,
-          move_id: model.id
-        )
-      end
-
-      $prompt.say("#{$pastel.bold.bright_white.on_black(model.name)} has been created!")
-      sleep(0.1)
-      $bar.advance()
+  if !move_count.zero?
+    $prompt.say("Err there are #{move_count} records in the DB", color: :red)
+    destroy = $prompt.ask("Do you want to clear the records?", default: "n")
+    if destroy&.downcase == "y"
+      Move.destroy_all 
+      $prompt.say("Database cleared.", color: :green)
     end
+  end 
 
-    move_count = Move.count
-    reset_bar()
+  # Fetch the initial list of moves
+  response = HTTParty.get($move_endpoint)
+  return nil if response.empty? || response["results"].empty?
+  
+  moves_list = response["results"]
 
-    $prompt.say("Success! Moves Table has been built!", color: :magenta) if !move_count.zero?
-    $prompt.say("Failure! Moves Table failed to build!", color: :cyan) if move_count.zero?
+  # 1. Initialize the Progress Bar
+  # We use :item_name as a placeholder for the move being processed
+  bar = TTY::ProgressBar.new(
+    "Parsing :item_name [:bar] :percent", 
+    total: moves_list.count, 
+    width: 30
+  )
 
-    return (Move.count.zero?) ? false : true
+  moves_list.each do |move| 
+    # 2. Update the label and advance the bar
+    # .ljust(20) ensures the bar doesn't jump around if names vary in length
+    bar.advance(item_name: move["name"].ljust(20))
+
+    move_datum = HTTParty.get(move["url"])
+    short_txt = move_datum['effect_entries'].find { |e| e['language']['name'] == 'en' }
+
+    model = Move.create(
+      name: move["name"].split("-").join(" "),
+      url: move["url"],
+      move_type: move_datum['type']['name'],
+      power: move_datum['power'] || 'data not available',
+      short_text: short_txt ? short_txt['short_effect'] : 'ERR NO DATA',
+    )
+    
+    next if model.nil? # Use next instead of return nil to keep the loop going
+
+    # Associate with Pokemon
+    move_datum["learned_by_pokemon"].each do |ld|
+      pokemon = Pokemon.find_by(name: ld["name"])
+      next if pokemon.nil?
+
+      PokemonMove.create(
+        pokemon_id: pokemon.poke_id,
+        move_id: model.id
+      )
+    end
+    
+    # Small sleep so the user can actually see the progress bar movement
+    sleep(0.05) 
   end
+
+  # Final status check
+  final_count = Move.count
+  if !final_count.zero?
+    $prompt.say("\nSuccess! Moves Table has been built!", color: :magenta)
+    return true
+  else
+    $prompt.say("\nFailure! Moves Table failed to build!", color: :cyan)
+    return false
+  end
+end
 
   def make_move_model(move_url: nil)
     return nil if move_url.nil?
