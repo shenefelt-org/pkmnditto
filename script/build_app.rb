@@ -35,22 +35,31 @@ bar_options = {
 bar = TTY::ProgressBar.new(format_string, bar_options)
 
 def destroy_db()
-  pastel = Pastel.new
-  bar_options = {
-    total: 4,
-    width: 100,
-    complete: "=",
-    incomplete: "-",
-    clear: false
-  }
-  format = "#{pastel.magenta('Destroying :name')} [:bar]"
-  bar = TTY::ProgressBar.new(format, bar_options)
+  # pastel = Pastel.new
+  # bar_options = {
+  #   total: 4,
+  #   width: 100,
+  #   complete: "=",
+  #   incomplete: "-",
+  #   clear: false
+  # }
+  # format = "#{pastel.magenta('Destroying :name')} [:bar]"
+  bar = TTY::ProgressBar.new(
+  "Cleaning DB: [:bar] :item_name :percent", 
+  total: 4, 
+  width: 30
+)
   methods = [Pokemon, Type, Move, DamageRelation]
 
-  bar.iterate(methods) do |model|
-    bar.update(name: model.name.ljust(20))
-    model.destroy_all
-    sleep(0.1)
+bar.iterate(methods) do |model_data|
+    # Update the label with the current model name
+    bar.update(item_name: model_data.name.ljust(20))
+    
+    # Perform the destruction
+    model_data.destroy_all
+    
+    # Small sleep just so the human eye can see the bar move
+    sleep(0.3) 
   end
   prompt.ok("Database Destroyed")
 end
