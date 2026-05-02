@@ -23,6 +23,16 @@ load Rails.root.join("script/destroy_db_tables.rb")
 
 pastel = Pastel.new 
 prompt = TTY::Prompt.new
+format_string = "#{pastel.bold.bright_magenta.inverse.on_black('Building :name')} {:bar} :percent"
+
+bar_options = {
+  total: 4,
+  width: 100,
+  complete: "👻",
+  incomplete: " ",
+  clear: false,
+}
+bar = TTY::ProgressBar.new(format_string, bar_options)
 
 
 if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?)
@@ -32,7 +42,7 @@ if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRela
   )
 
   if answer == 'y'
-    destroy_current_db()
+    
     prompt.say(
       "#{pastel.italic.bright_green(' -> Success DB Destroyed')}"
     )
@@ -44,6 +54,7 @@ if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRela
   end
 end
 
+bar.advance(1, name: "Pokemon")
 # Build the Pokemon Table
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Pokemon Table..')}"
@@ -57,6 +68,7 @@ prompt.say(
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Moves Table.')}"
 )
+move_count = Move.count
 build_moves_from_restapi() unless !move_count.zero?
 move_count = Move.count
 prompt.say(

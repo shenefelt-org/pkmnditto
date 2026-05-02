@@ -64,8 +64,9 @@ module MovesHelper
       )
       return nil if model.nil?
 
-      pokemon = nil.
-      move["learned_by_pokemon"].each do |ld|
+      pokemon = nil
+
+      move_datum["learned_by_pokemon"].each do |ld|
         pokemon = Pokemon.find_by(name: ld["name"])
         next if pokemon.nil?
 
@@ -104,15 +105,6 @@ module MovesHelper
       short_text: short_effect ? short_effect['short_effect'] : "ERR"
     )
 
-    learned.each do |ld|
-      pokemon = Pokemon.find_by(name: ld['name'])
-      next if pokemon.nil?
-
-      PokemonMove.create(
-      pokemon_id: pokemon.id,
-      move_id: move.id,
-      )
-    end
 
     return move
 
