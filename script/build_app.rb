@@ -21,38 +21,76 @@ include MovesHelper
 
 load Rails.root.join("script/destroy_db_tables.rb")
 
+pastel = Pastel.new 
+prompt = TTY::Prompt.new
+
 
 if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?)
-  puts "WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)"
-  answer = gets.chomp.downcase
+  answer = prompt.ask(
+    "#{pastel.italic.bright_red('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}",
+    default: "n"
+  )
+
   if answer == 'y'
     destroy_current_db()
-    puts "-> success "
+    prompt.say(
+      "#{pastel.italic.bright_green(' -> Success DB Destroyed')}"
+    )
   else
-    puts "exiting script"
+    prompt.say(
+      "#{pastel.bold.bright_red('Failed DB intact')}"
+    )
     exit
   end
 end
 
-puts "populating pokemon.."
-build_pkmn_from_graphql() unless !pkmn_count.zero?
-pkmn_count = Pokemon.count
-puts "-> #{(!pkmn_count.zero?) ? 'success' : 'fail'}"
+# Build the Pokemon Table
+prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Building Pokemon Table..')}"
+)
+build_pkmn_from_graphql() if Pokemon.count.zero?
+pkmn_count = Pokemon.count.zero?
+prompt.say(
+  "#{pastel.bold.bright_magenta.on_black((pkmn_count ? 'Success Pokemon Table Built!' : 'ERR'))}"
+)
 
-puts "populating moves.."
+prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Building Moves Table.')}"
+)
 build_moves_from_restapi() unless !move_count.zero?
 move_count = Move.count
-puts "-> #{(!move_count.zero?) ? 'success' : 'fail'}"
+prompt.say(
+  "#{pastel.bold.bright_magenta.on_black((move_count.zero?) ? 'ERR' : 'Success Moves Table Built!')}"
+)
 
-puts "populating types.."
+prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Building Types Table..')}"
+)
 build_types_from_restapi() unless !type_count.zero?
 type_count = Type.count
-puts "-> #{(!type_count.zero?) ? 'success' : 'fail'}"
+prompt.say(
+  "#{(pastel.bold.bright_magenta.on_black(!type_count.zero?) ? 'Success Types Table Built!' : 'fail')}"
+)
 
-puts "populating damage relations.."
+prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Building Damage Relations Table..')}"
+)
 build_damage_relations_from_types() unless !DamageRelation.count.zero?
 relations_count = DamageRelation.count
-puts "-> #{(!relations_count.zero?) ? 'success' : 'fail'}"
+prompt.say(
+  "#{(pastel.bold.bright_magenta.on_black(!relations_count.zero?) ? 'Success Damage Relations Table Built!' : 'fail')}"
+)
+
+prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Assining Leanred Moves..')}"
+)
+assign_learned_moves() unless Move.count.zero? || Pokemon.count.zero?
+prompt.say(
+  "#{pastel.bold.bright_magenta.on_black((PokemonMove.count.zero?) ? 'ERR' : 'Success Assigned Move Relations')}"
+)
+
+
+
 
 puts "===== RESULTS ====="
 puts "Build Pkmn #{(!pkmn_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{pkmn_count} Pokemon models"

@@ -13,6 +13,7 @@ require 'tty-prompt'
 require 'tty-progressbar'
 require 'pastel'
 module PokemonsHelper
+  include MovesHelper
 
   # gets pokemon data for every pokemon and creates and stores a model in the db for each one
   # DO NOT RUN without dumping the curent db 
@@ -46,37 +47,39 @@ def build_pkmn_from_graphql
   bar_options = {
     total: raw_data.length,
     width: 40,
-    complete: $pastel.black.on_green("&"),
-    incomplete: $pastel.bright_red.on_black("*"),
-    clear: true
+    complete: pastel.bright_green("&"),
+    incomplete: pastel.bright_red.on_black("*"),
+    clear: false
   }
 
-  format = "#{pastel.bright_red("Parsing :name")} [:bar] :percent | :itteration"
+  format = "#{pastel.bright_green("Parsing :name")} [:bar] :percent "
   bar = TTY::ProgressBar.new(format, bar_options)
+
 
   raw_data.map do |pkmn|
     
-    # pokemon = Pokemon.create(
-    #   poke_id:        pkmn['poke_id'],
-    #   name:           pkmn['name'],
-    #   base_exp:       pkmn['base_exp'],
-    #   pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
-    #   abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
-    #   default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
-    # )
-    prompt.say("#{pastel.bright_red.on_blue("Failure creating #{pkmn['name']}")}") if pokemon.empty?
+     Pokemon.create(
+       poke_id:        pkmn['poke_id'],
+       name:           pkmn['name'],
+       base_exp:       pkmn['base_exp'],
+       pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
+       abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
+       default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
+     ) 
 
-    # build_pokemon_model(pkmn: {
-    #   poke_id:        pkmn['poke_id'],
-    #   name:           pkmn['name'],
-    #   base_exp:       pkmn['base_exp'],
-    #   pkmn_type:      pkmn['pokemon_v2_pokemontypes'].map { |t| t['pokemon_v2_type']['name'] }.join(', '),
-    #   abilities:      pkmn['pokemon_v2_pokemonabilities'].map { |a| a['pokemon_v2_ability']['name'] },
-    #   default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
-    # })
+     poke_count = Pokemon.count
+
+     prompt.say("#{pastel.cyan('No pokemon loaded')}") if poke_count.zero?
+
 
     bar.advance(1, name: pkmn['name'])
   end
+
+  prompt.say("Getting ")
+  get_pokemon_cries() unless Pokemon.count.zero?
+  get_pokemon_moves() unless Pokemon.count.zero? || Move.count.zero?
+
+  return false 
 
 end
     
@@ -94,7 +97,7 @@ def build_pokemon_model(pkmn: nil)
   )
 end
 
-def get_pokemon_cries(poke: nil)
+def get_pokemon_cries()
   pkmn = Pokemon.all 
   pkmn = build_pkmn_from_graphql() if pkmn.blank?
   return nil if pkmn.blank?
@@ -109,6 +112,27 @@ def get_pokemon_cries(poke: nil)
     }])
 
   end
+end
+
+def get_pokemon_moves()
+
+  build_moves_from_restapi() if Move.count.zero?
+  moves = Move.all
+
+  return if moves.nil? || Pokemon.count.zero?
+
+  move.each do |move|
+    learned_data = HTTParty.get(move.url)['learned_by_pokemon']
+    next if learned_data.empty?
+
+    learned_data.each do |ld|
+      curr = Pokemon.find_by(name: ld['name'])
+      curr.moves << move
+    end
+  end
+
+  return true 
+
 end
 
 # Find a pokemons damage relations (this will be done by active record in the application)

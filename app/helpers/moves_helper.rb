@@ -39,7 +39,7 @@ module MovesHelper
     move_count = Move.count
     build_success = false
 
-    # check for records and offer destruction before rebuild 
+    # check for records and offer destruction before rebuild Parsing melmetal-gmax [&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&**] 94% Failure creating rillaboom-gmax
     if !move_count.zero?
       $prompt.say("Err there are #{move_count} records in the DB", color: :red)
       destroy = $prompt.ask("Do you want to clear the records?", default: "n")

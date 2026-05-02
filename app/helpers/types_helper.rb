@@ -63,7 +63,6 @@ module TypesHelper
     return nil if type.nil?
   end
 
-  end
 
 
 end
