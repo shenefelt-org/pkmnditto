@@ -47,17 +47,18 @@ def build_pkmn_from_graphql
   bar_options = {
     total: raw_data.length,
     width: 40,
-    complete: pastel.bright_green("&"),
-    incomplete: pastel.bright_red.on_black("*"),
+    complete: pastel.bright_green("="),
+    incomplete: pastel.bright_red.on_black("-"),
     clear: false
   }
 
-  format = "#{pastel.bright_green("Parsing :name")} [:bar] :percent "
+  format = "#{pastel.bold.bright_green("Creating :name")} [:bar] "
   bar = TTY::ProgressBar.new(format, bar_options)
 
 
   raw_data.map do |pkmn|
-    bar.advance(name: pkmn['name'].ljust(10))
+    bar.advance(name: pkmn['name'].ljust(20))
+    sleep(0.2)
     
      Pokemon.create(
        poke_id:        pkmn['poke_id'],
@@ -70,11 +71,11 @@ def build_pkmn_from_graphql
 
   end
 
-  prompt.say("Getting ")
-  get_pokemon_cries() unless Pokemon.count.zero?
-  get_pokemon_moves() unless Pokemon.count.zero? || Move.count.zero?
 
-  return false 
+  return false if Pokemon.count.zero?
+  cries_format = "#{pastel.bold.bright_magenta('Gathering Pokemon Cries')}"
+  prompt.say(cries_format)
+  return get_pokemon_cries() ? prompt.say("#{pastel.bold.bright_green('Success! Pokemon Cries Gathered!')}") : prompt.say("#{pastel.bold.bright_red('Failed to gather cries')}")
 
 end
     
@@ -93,42 +94,34 @@ def build_pokemon_model(pkmn: nil)
 end
 
 def get_pokemon_cries()
+  pastel = Pastel.new
+  bar_options = {
+    total: Pokemon.count,
+    width: 100,
+    complete: "=",
+    incomplete: '-',
+    clear: false,
+  }
+  format = "#{pastel.bold.bright_green('Gathering cries for :name')} [:bar] :percent"
+  bar = TTY::ProgressBar.new(format, bar_options)
   pkmn = Pokemon.all 
   pkmn = build_pkmn_from_graphql() if pkmn.blank?
   return nil if pkmn.blank?
 
-  pkmn.each_with_index do |poke, index| 
-    puts "#{index} Getting #{poke.name} cries..."
+  pkmn.each_with_index do |poke, index|
+    bar.advance(name: poke.name.ljust(20)) 
     p = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{poke.id}") 
-
+    sleep(0.1)
    poke.update(cries: [{
       legacy: p.dig("cries", "legacy"),
       latest: p.dig("cries", "latest")
     }])
 
   end
+
+  return true
 end
 
-def get_pokemon_moves()
-
-  build_moves_from_restapi() if Move.count.zero?
-  moves = Move.all
-
-  return if moves.nil? || Pokemon.count.zero?
-
-  move.each do |move|
-    learned_data = HTTParty.get(move.url)['learned_by_pokemon']
-    next if learned_data.empty?
-
-    learned_data.each do |ld|
-      curr = Pokemon.find_by(name: ld['name'])
-      curr.moves << move
-    end
-  end
-
-  return true 
-
-end
 
 # Find a pokemons damage relations (this will be done by active record in the application)
 def find_damage_relations(pkmn: nil)

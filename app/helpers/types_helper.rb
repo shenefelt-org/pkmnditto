@@ -16,8 +16,8 @@ module TypesHelper
     options = {
       total: Type.count,
       width: 40,
-      complete: $pastel.black.on_green("."),
-      incomplete: $pastel.bright_red.on_black(" "),
+      complete: $pastel.black.on_green("="),
+      incomplete: $pastel.bright_red.on_black("-"),
       clear: true
     }
     bar = TTY::ProgressBar.new(format, options)
