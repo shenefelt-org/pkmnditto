@@ -47,13 +47,12 @@ def destroy_db()
   bar = TTY::ProgressBar.new(
   "Cleaning DB: [:bar] :item_name :percent", 
   total: 4, 
-  width: 30
-)
+  width: 30)
   methods = [Pokemon, Type, Move, DamageRelation]
 
-bar.iterate(methods) do |model_data|
+methods.each do |model_data|
     # Update the label with the current model name
-    bar.update(item_name: model_data.name.ljust(20))
+    bar.advance(item_name: model_data.name.ljust(20))
     
     # Perform the destruction
     model_data.destroy_all
