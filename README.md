@@ -6,8 +6,7 @@
 ```bash
 rails runner script/build.rb
 ```
-Running the script builds:
-
-    * pokemons
-    * types
-    * moves 
+Running the script builds the following tables:
+* pokemons
+* types
+* moves 
