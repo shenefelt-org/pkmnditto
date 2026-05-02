@@ -37,8 +37,6 @@ module MovesHelper
   # Build the tables and their relations
   def build_moves_from_restapi
     move_count = Move.count
-    build_success = false
-
     # check for records and offer destruction before rebuild Parsing melmetal-gmax [&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&**] 94% Failure creating rillaboom-gmax
     if !move_count.zero?
       $prompt.say("Err there are #{move_count} records in the DB", color: :red)
@@ -67,7 +65,18 @@ module MovesHelper
       )
       return nil if model.nil?
 
-      $prompt.say("Success created model for #{model.name}", color: :cyan)
+      pokemon = nil.
+      move["learned_by_pokemon"].each do |ld|
+        pokemon = Pokemon.find_by(name: ld["name"])
+        next if pokemon.nil?
+
+        PokemonMove.create(
+          pokemon_id: pokemon.poke_id,
+          move_id: model.id
+        )
+      end
+
+      $prompt.say("#{$pastel.bold.bright_white.on_black(model.name)} has been created!")
       sleep(0.1)
       $bar.advance()
     end
@@ -86,15 +95,29 @@ module MovesHelper
     move_dat = get_move_by_url(url: move_url)
     return nil if move_dat.empty?
     short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
+    learned = move_data['learned_by_pokemon']
     $prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
-
-    return Model.create(
+    move = Move.create(
       name: move_dat['name'],
       url: move_url,
       move_type: move_dat['type']['name'],
       power: move_dat['power'] ||= 'data_not available from the pokeapi',
       short_text: short_effect ? short_effect['short_effect'] : "ERR"
     )
+
+    learned.each do |ld|
+      pokemon = Pokemon.find_by(name: ld['name'])
+      next if pokemon.nil?
+
+      PokemonMove.create(
+      pokemon_id: pokemon.id,
+      move_id: move.id,
+      )
+    end
+
+    return move
+
+
   end
 
   def get_move_by_url(url: nil)
