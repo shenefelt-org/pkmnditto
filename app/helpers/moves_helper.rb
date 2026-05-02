@@ -78,20 +78,9 @@ def build_moves_from_restapi
     )
     
     next if model.nil? # Use next instead of return nil to keep the loop going
-
-    # Associate with Pokemon
-    move_datum["learned_by_pokemon"].each do |ld|
-      pokemon = Pokemon.find_by(name: ld["name"])
-      next if pokemon.nil?
-
-      PokemonMove.create(
-        pokemon_id: pokemon.poke_id,
-        move_id: model.id
-      )
-    end
     
     # Small sleep so the user can actually see the progress bar movement
-    sleep(0.05) 
+    sleep(0.1) 
   end
 
   # Final status check
@@ -110,7 +99,6 @@ end
     move_dat = get_move_by_url(url: move_url)
     return nil if move_dat.empty?
     short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
-    learned = move_data['learned_by_pokemon']
     $prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
     move = Move.create(
       name: move_dat['name'],
@@ -145,39 +133,25 @@ end
 
 
   
-def get_learned_by(pokemon_id: nil)
-  return nil if pokemon_id.nil?
-    
-  # Fetch the specific Pokémon
-  res = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pokemon_id}")
-  return nil if res.blank? || res["moves"].blank?
-  pkmn = Pokemon.find_by(poke_id: pokemon_id)
+def assign_learned_moves()
+  return nil if Move.count.zero?
+  moves = Move.all
+  moves.each do |move|
+    move_data = HTTParty.get(move.url)
+    next if move_data.empty? || move_data['learned_by_pokemon'].empty?
 
-  pokemon_moves = []
+    move_data['learned_by_pokemon'].each do |pokemon|
+      pkmn_record = Pokemon.find_by(name: pokemon['name'])
+      next if pkmn_record.nil?
 
-  res["moves"].each do |move_entry|
-      # 1. Dig the name and level
-    name = move_entry.dig("move", "name")
-    level = move_entry.dig("version_group_details", 0, "level_learned_at")
-      
-      # 2. Check if the move already exists in your DB to save time/API calls
-    move_node = Move.find_by(name: name)
-
-      # 3. If it doesn't exist, use your existing logic to fetch detail and create it
-    if move_node.nil?
-      move_url = move_entry.dig("move", "url")
-      move_node = make_move_model(move_url: move_url)
+      PokemonMove.create(
+        pokemon_id: pkmn_record.poke_id,
+        move_id: move.id
+      )
     end
+  end
 
-    pokemon_moves << { move: move_node, level: level }
-    end
-
-    return false if pokemon_moves.empty?
-    pokemon_moves.each do |pm|
-      move = Move.find_by(name: pm[:move].name)
-      return nil if move.nil?
-      pkmn.moves << move
-    end
+  return true
 end
 
 def move_weaknesses(move_name: nil)

@@ -1,5 +1,10 @@
 require 'httparty'
 require 'json'
+require 'pastel'
+require 'tty'
+require 'tty-prompt'
+require 'tty-progressbar'
+
 module TypesHelper
   $type_endpoint = "https://pokeapi.co/api/v2/type/"
   $default_type = "#{$type_endpoint}7"
@@ -7,10 +12,24 @@ module TypesHelper
   
   # also have this built a map that maps the name to the id of hte type
   def build_types_from_restapi
+    format = "Loading #{$pastel.bright_red("Loading types..")} [:bar] :percent"
+    options = {
+      total: Type.count,
+      width: 40,
+      complete: $pastel.black.on_green("."),
+      incomplete: $pastel.bright_red.on_black(" "),
+      clear: true
+    }
+    bar = TTY::ProgressBar.new(format, options)
+
     types = HTTParty.get($type_endpoint)
     return nil if types.empty? || types['results'].empty?
 
-    return types['results'].each { |type| build_type_model(type_hash: type) }
+    return types['results'].each do |type| 
+      build_type_model(type_hash: type)
+      sleep(0.1)
+      bar.advance(1, type_name: type['name'].ljust(20)) 
+    end
 
   end
 

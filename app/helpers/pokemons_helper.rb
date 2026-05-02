@@ -57,6 +57,7 @@ def build_pkmn_from_graphql
 
 
   raw_data.map do |pkmn|
+    bar.advance(name: pkmn['name'].ljust(10))
     
      Pokemon.create(
        poke_id:        pkmn['poke_id'],
@@ -67,12 +68,6 @@ def build_pkmn_from_graphql
        default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
      ) 
 
-     poke_count = Pokemon.count
-
-     prompt.say("#{pastel.cyan('No pokemon loaded')}") if poke_count.zero?
-
-
-    bar.advance(1, name: pkmn['name'])
   end
 
   prompt.say("Getting ")
