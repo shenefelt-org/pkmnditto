@@ -34,12 +34,33 @@ bar_options = {
 }
 bar = TTY::ProgressBar.new(format_string, bar_options)
 
+def destroy_db()
+  pastel = Pastel.new
+  bar_options = {
+    total: 4,
+    width: 100,
+    complete: "=",
+    incomplete: "-",
+    clear: false
+  }
+  format = "#{pastel.magenta('Destroying :name')} [:bar]"
+  bar = TTY::ProgressBar.new(format, bar_options)
+  methods = [Pokemon, Type, Move, DamageRelation]
+
+  bar.itterate(methods).each do |model|
+    bar.update(name: model.name.ljust(20))
+    model.destroy_all
+    sleep(0.1)
+  end
+  prompt.ok("Database Destroyed")
+end
+
 
 if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?)
   if prompt.yes?(
     "#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}",
     default: "n")
-    bar.advance(name: "Destroying DB")
+    destroy_db()
   else
     prompt.say(
       "#{pastel.italic.bright_red.inverse.on_white('Skipping Deletion')}"
