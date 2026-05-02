@@ -77,13 +77,13 @@ prompt.say(
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Moves Table.')}"
 )
-bar.advance(name: "Moves")
 move_count = Move.count
 build_moves_from_restapi() unless !move_count.zero?
 move_count = Move.count
 prompt.say(
   "#{pastel.bold.bright_magenta.on_black((move_count.zero?) ? 'ERR' : 'Success Moves Table Built!')}"
 )
+bar.advance(name: "Moves".ljust(20))
 
 
 prompt.say(
