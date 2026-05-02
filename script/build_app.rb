@@ -68,6 +68,7 @@ prompt.say(
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Types Table..')}"
 )
+type_count = Type.count
 build_types_from_restapi() unless !type_count.zero?
 type_count = Type.count
 prompt.say(
