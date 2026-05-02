@@ -35,6 +35,7 @@ bar_options = {
 bar = TTY::ProgressBar.new(format_string, bar_options)
 
 def destroy_db()
+  prompt = TTY::Prompt.new
   # pastel = Pastel.new
   # bar_options = {
   #   total: 4,
