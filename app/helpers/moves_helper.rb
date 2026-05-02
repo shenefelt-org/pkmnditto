@@ -61,7 +61,6 @@ module MovesHelper
         move_type: move_datum['type']['name'],
         power: move_datum['power'] ||= 'data not available',
         short_text: short_txt['short_effect'] ||= 'ERR NO DATA',
-        type_id: move_types.id ||= nil
       )
       return nil if model.nil?
 
