@@ -39,33 +39,21 @@ if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRela
   if prompt.yes?(
     "#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}",
     default: "n")
+    bar.advance(name: "Destroying DB")
   else
     prompt.say(
       "#{pastel.italic.bright_red.inverse.on_white('Skipping Deletion')}"
     )
   end
 
-
-
-  if answer.downcase == 'y'
-    
-    prompt.say(
-      "#{pastel.italic.bright_green(' -> Success DB Destroyed')}"
-    )
-  else
-    prompt.say(
-      "#{pastel.bold.bright_red('Failed DB intact')}"
-    )
-    exit
-  end
 end
 
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Types Table..')}"
 )
 type_count = Type.count
+bar.advance(name: "Types".ljust(20))
 sleep(0.1)
-bar.advance(name: "Types")
 build_types_from_restapi() unless !type_count.zero?
 type_count = Type.count
 prompt.say(
@@ -78,7 +66,7 @@ prompt.say(
 )
 build_pkmn_from_graphql() if Pokemon.count.zero?
 sleep(0.1)
-bar.advance(name: "Pokemon")
+bar.advance(name: "Pokemon".ljust(20))
 pkmn_count = Pokemon.count.zero?
 prompt.say(
   "#{pastel.bold.bright_magenta.on_black((!pkmn_count ? 'Success Pokemon Table Built!' : 'ERR'))}"
