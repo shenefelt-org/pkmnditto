@@ -68,15 +68,9 @@ build_pkmn_from_graphql() if Pokemon.count.zero?
 sleep(0.1)
 bar.advance(name: "Pokemon".ljust(20))
 pkmn_count = Pokemon.count.zero?
-prompt.say(
-  "#{pastel.bold.bright_magenta.on_black((!pkmn_count ? 'Success Pokemon Table Built!' : 'ERR'))}"
-)
 
 
 
-prompt.say(
-  "#{pastel.bold.bright_blue.on_black('Building Moves Table.')}"
-)
 move_count = Move.count
 build_moves_from_restapi() unless !move_count.zero?
 move_count = Move.count
