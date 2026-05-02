@@ -1,6 +1,10 @@
 # PkmnDitto 
 
 ![spirit](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/442.png)
+### app version info
+* rails
+* ruby
+
 
 # Build the app
 ```bash
