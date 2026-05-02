@@ -7,6 +7,7 @@
 rails runner script/build.rb
 ```
 Running the script builds:
+
     * pokemons
     * types
     * moves 
