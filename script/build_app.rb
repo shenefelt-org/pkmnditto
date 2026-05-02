@@ -66,6 +66,15 @@ prompt.say(
 )
 
 prompt.say(
+  "#{pastel.bold.bright_blue.on_black('Building Types Table..')}"
+)
+build_types_from_restapi() unless !type_count.zero?
+type_count = Type.count
+prompt.say(
+  "#{(pastel.bold.bright_magenta.on_black(!type_count.zero?) ? 'Success Types Table Built!' : 'fail')}"
+)
+
+prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Moves Table.')}"
 )
 move_count = Move.count
@@ -75,14 +84,7 @@ prompt.say(
   "#{pastel.bold.bright_magenta.on_black((move_count.zero?) ? 'ERR' : 'Success Moves Table Built!')}"
 )
 
-prompt.say(
-  "#{pastel.bold.bright_blue.on_black('Building Types Table..')}"
-)
-build_types_from_restapi() unless !type_count.zero?
-type_count = Type.count
-prompt.say(
-  "#{(pastel.bold.bright_magenta.on_black(!type_count.zero?) ? 'Success Types Table Built!' : 'fail')}"
-)
+
 
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Building Damage Relations Table..')}"
