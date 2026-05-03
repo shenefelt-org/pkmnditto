@@ -48,7 +48,10 @@ def destroy_db()
   bar = TTY::ProgressBar.new(
   "Cleaning DB: [:bar] :item_name :percent", 
   total: 4, 
-  width: 30)
+  width: 30,
+  complete: pastel.bright_red("X"),
+  incomplete: pastel.bright_green("-"),
+  )
   methods = [Pokemon, Type, Move, DamageRelation]
 
 methods.each do |model_data|
@@ -78,25 +81,17 @@ if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRela
 
 end
 
-prompt.say(
-  "#{pastel.bold.bright_blue.on_black('Building Types Table..')}"
-)
-type_count = Type.count
 bar.advance(name: "Types".ljust(20))
-sleep(0.1)
+type_count = Type.count
 build_types_from_restapi() unless !type_count.zero?
 type_count = Type.count
 prompt.say(
   "#{(pastel.bold.bright_magenta.on_black(!type_count.zero?) ? 'Success Types Table Built!' : 'fail')}"
 )
 
-# Build the Pokemon Table
-prompt.say(
-  "#{pastel.bold.bright_blue.on_black('Building Pokemon Table..')}"
-)
-build_pkmn_from_graphql() if Pokemon.count.zero?
-sleep(0.1)
 bar.advance(name: "Pokemon".ljust(20))
+sleep(0.1)
+build_pkmn_from_graphql() if Pokemon.count.zero?
 pkmn_count = Pokemon.count.zero?
 
 
