@@ -73,38 +73,41 @@ methods.each do |model_data|
   return true
 end
 
-bar.advance(name: "Types".ljust(20))
-type_count = Type.count
-build_types_from_restapi() unless !type_count.zero?
-type_count = Type.count
-prompt.say(
-  "#{(pastel.bold.bright_magenta.on_black(!type_count.zero?) ? 'Success Types Table Built!' : 'fail')}"
-)
+def build()
+  prompt = TTY::Prompt.net
+  pastel = Pastel.new
+  format = "#{pastel.italic.bright_green('Building: :name')} :percent | ETA :eta"
 
-bar.advance(name: "Pokemon".ljust(20))
-sleep(0.1)
-build_pkmn_from_graphql() if Pokemon.count.zero?
-pkmn_count = Pokemon.count.zero?
+classes = [Pokemon, Move, Type] # Use the constants directly
 
+classes.each do |model|
+  bar.advance(1, name: model.name.ljust(20))
 
-
-move_count = Move.count
-build_moves_from_restapi() unless !move_count.zero?
-move_count = Move.count
-prompt.say(
-  "#{pastel.bold.bright_magenta.on_black((move_count.zero?) ? 'ERR' : 'Success Moves Table Built!')}"
-)
-bar.advance(name: "Moves".ljust(20))
-
+  if model.count.zero?
+    case model.name
+    when "Pokemon"
+      build_pkmn_from_graphql()
+    when "Move"
+      build_moves_from_restapi()
+    when "Type"
+      build_types_from_restapi()
+    end
+  else
+    prompt.say("#{pastel.bold.bright_yellow.on_black("Skipping #{model.name} - already has data")}")
+  end
+end
+  bar.advance(name: "Learned Moves")
+  assign_learned_moves() unless Move.count.zero? || Pokemon.count.zero?
+  prompt.say(
+    "#{pastel.bold.bright_magenta.on_black((PokemonMove.count.zero?) ? 'ERR' : 'Success Assigned Move Relations')}" 
+  )
+  return (!Pokemon.count.zero? && !Move.count.zero? && !Type.count.zero?) ? true : false
+end
 
 prompt.say(
   "#{pastel.bold.bright_blue.on_black('Assigning Leanred Moves..')}"
 )
-bar.advance(name: "Learned Moves")
-assign_learned_moves() unless Move.count.zero? || Pokemon.count.zero?
-prompt.say(
-  "#{pastel.bold.bright_magenta.on_black((PokemonMove.count.zero?) ? 'ERR' : 'Success Assigned Move Relations')}"
-)
+
 
 
 
