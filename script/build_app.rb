@@ -39,7 +39,8 @@ if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRela
   if prompt.yes?(
     "#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}",
     default: "n")
-    destroy_db()
+    destroyed = destroy_db()
+
   else
     prompt.say(
       "#{pastel.italic.bright_red.inverse.on_white('Skipping Deletion')}"
@@ -69,7 +70,7 @@ methods.each do |model_data|
   bar.finish()
   prompt.ok("#{pastel.bright_red('Database destruction complete..')}")
 
-  return ( Pokemon.count.zero? && Move.count.zero? && Type.count.zero? && DamageRelation.count.zero?) ? true : false
+  return true
 end
 
 bar.advance(name: "Types".ljust(20))
@@ -115,7 +116,6 @@ puts "===== RESULTS ====="
 puts "Build Pkmn #{(!pkmn_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{pkmn_count} Pokemon models"
 puts "Build Move #{(!move_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{move_count} Move models"
 puts "Build Type #{(!type_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{type_count} Type models"
-puts "Build Damage Relations #{(!relations_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{relations_count} Type models"
 puts "===== END ====="
 
 return true
