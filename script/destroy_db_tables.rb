@@ -3,25 +3,50 @@ require 'tty-prompt'
 require 'tty-progressbar'
 require "pastel"
 
-pastel = Pastel.new
-# Format string using your green label and multiple tokens
-format = "#{pastel.green("Loading")} [:bar] :percent | Elapsed: :elapsed | ETA: :eta"
 
-bar = TTY::ProgressBar.new(format, total: 50, complete: "■", incomplete: " ")
 
-50.times do
-  sleep(0.1)
-  bar.advance
+def dump_tables()
+  prompt = TTY::Prompt.new
+  pastel = Pastel.new
+  format = "#{pastel.green("Destroying :name")} [:bar] :percent | Elapsed: :elapsed | ETA: :eta"
+  bar_options = {
+    count: 4,
+    width: 100,
+    complete: "=",
+    incomplete: '-',
+    clear: false
+  }
+  bar = TTY::ProgressBar.new(format, bar_options)
+
+  if(prompt.yes?("Destroy all DB tables?", default: n))
+    p = destroy_pkmn
+    m = destroy_moves
+
 end
 
-
 def destroy_current_db
+  prompt = TTy::Prompt.new
+  pastel = Pastel.new
+# Format string using your green label and multiple tokens
+  format = "#{pastel.green("Destroying :name")} [:bar] :percent | Elapsed: :elapsed | ETA: :eta"
+  bar_options = {
+    count: 4,
+    width: 100,
+    complete: "=",
+    incomplete: '-',
+    clear: false
+  }
+  bar = TTY::ProgressBar.new(format, bar_options)
+  prompt.yes("Clear all tables?" default: "n")
+  bar.advance(1, name: "Pokemon")
   pkmn = destroy_pkmn()
+  bar.advance(1, name: "Moves")
   moves = destroy_moves()
+  bar.advance(1, name: "Types")
   types = destroy_types()
-  rel = destroy_damage_relations()
-  puts "-> Success all tables dropped!" unless !pkmn || !moves || !types || !rel
-  puts "-> Some failures occured, see above outputs."
+  prompt.ok("#{pastel.bold.bright_magenta('DB Destroyed!')}") unless !pkmn || !moves || !types || !rel
+  bar.finish()
+
 
 end
 

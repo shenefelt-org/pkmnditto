@@ -28,44 +28,11 @@ format_string = "#{pastel.bold.bright_magenta.inverse.on_black('Building :name')
 bar_options = {
   total: 4,
   width: 100,
-  complete: "👻",
-  incomplete: " ",
+  complete: "=",
+  incomplete: "-",
   clear: false,
 }
 bar = TTY::ProgressBar.new(format_string, bar_options)
-
-def destroy_db()
-  prompt = TTY::Prompt.new
-  # pastel = Pastel.new
-  # bar_options = {
-  #   total: 4,
-  #   width: 100,
-  #   complete: "=",
-  #   incomplete: "-",
-  #   clear: false
-  # }
-  # format = "#{pastel.magenta('Destroying :name')} [:bar]"
-  bar = TTY::ProgressBar.new(
-  "Cleaning DB: [:bar] :item_name :percent", 
-  total: 4, 
-  width: 30,
-  complete: pastel.bright_red("X"),
-  incomplete: pastel.bright_green("-"),
-  )
-  methods = [Pokemon, Type, Move, DamageRelation]
-
-methods.each do |model_data|
-    # Update the label with the current model name
-    bar.advance(item_name: model_data.name.ljust(20))
-    
-    # Perform the destruction
-    model_data.destroy_all
-    
-    # Small sleep just so the human eye can see the bar move
-    sleep(0.3) 
-  end
-  prompt.ok("Database Destroyed")
-end
 
 
 if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?)
@@ -79,6 +46,30 @@ if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRela
     )
   end
 
+end
+
+def destroy_db()
+  prompt = TTY::Prompt.new
+  methods = [Pokemon.class, Type.class, Move.class, DamageRelation.class]
+  bar = TTY::ProgressBar.new(
+  "Cleaning DB: [:bar] :item_name :percent", 
+  total: methods.length, 
+  width: 30,
+  complete: pastel.bright_red("="),
+  incomplete: pastel.bright_green("-"),
+  )
+
+methods.each do |model_data|
+    bar.advance(item_name: model_data.name.ljust(20))
+    
+    model_data.destroy_all
+    
+    sleep(0.3) 
+  end
+  bar.finish()
+  prompt.ok("#{pastel.bright_red('Database destruction complete..')}")
+
+  return ( Pokemon.count.zero? && Move.count.zero? && Type.count.zero? && DamageRelation.count.zero?) ? true : false
 end
 
 bar.advance(name: "Types".ljust(20))
