@@ -14,3 +14,9 @@ Running the script builds the following tables:
 * pokemons
 * types
 * moves 
+
+creates the following relationships:
+* Moves learned by
+* Type.moves
+
+
