@@ -1,5 +1,4 @@
 # temp fix for tty table err
-# Add this BEFORE any TTY requires
 unless defined?(Fixnum)
   Fixnum = Integer
 end
@@ -13,124 +12,95 @@ require 'tty-prompt'
 require 'tty-progressbar'
 require "pastel"
 
-# this will always run when trying to populate as to avoid importing data from the api that is already stored. if there is already data in the table users will need to confirm they want
-# to dump the table.
+
 include PokemonsHelper
 include TypesHelper
 include MovesHelper
 
 
+@pastel = Pastel.new 
+@prompt = TTY::Prompt.new
 
-pastel = Pastel.new 
-prompt = TTY::Prompt.new
-format_string = "#{pastel.bold.bright_magenta.inverse.on_black('Building :name')} {:bar} :percent"
-
-bar_options = {
-  total: 4,
-  width: 100,
-  complete: "=",
-  incomplete: "-",
-  clear: false,
-}
-bar = TTY::ProgressBar.new(format_string, bar_options)
-
-def begin
-  # Standardized the condition syntax and added the missing 'end'
+def begin_process
+ 
   if !Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?
     
-    if prompt.yes?("#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}")
-      destroy_db()
+    message = @pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data. Destroy and repopulate? (y/n)')
+    
+    if @prompt.yes?(message)
+      destroy_db
     else
-      prompt.say("#{pastel.italic.bright_red.inverse.on_white('Skipping Deletion')}")
+      @prompt.say(@pastel.italic.bright_red.inverse.on_white('Skipping Deletion'))
     end
-
   end
 
-  build()
+  build
 end
 
-
-
-
-
-def destroy_db()
-  prompt = TTY::Prompt.new
-  methods = [Pokemon, Type, Move, DamageRelation]
+def destroy_db
+  models = [Pokemon, Type, Move, DamageRelation]
+  
   bar = TTY::ProgressBar.new(
-  "Cleaning DB: [:bar] :item_name :percent", 
-  total: methods.length, 
-  width: 30,
-  complete: pastel.bright_red("="),
-  incomplete: pastel.bright_green("-"),
+    "Cleaning DB: [:bar] :item_name :percent", 
+    total: models.length, 
+    width: 30,
+    complete: @pastel.bright_red("="),
+    incomplete: @pastel.bright_green("-")
   )
 
-  # destroy each model
-  methods.each do |model_data|
-    bar.advance(item_name: model_data.name.ljust(20))
-    model_data.destroy_all
-    sleep(0.3) 
+  models.each do |model|
+    bar.advance(item_name: model.name.ljust(20))
+    model.destroy_all
+    sleep(0.1) 
   end
 
-  bar.finish()
-  prompt.ok("#{pastel.bright_red('Database destruction complete..')}")
-
-  return true
+  bar.finish
+  @prompt.ok(@pastel.bright_red('Database destruction complete..'))
+  true
 end
 
-def build()
-  prompt = TTY::Prompt.net
-  pastel = Pastel.new
-  classes = [Pokemon, Move, Type] # Use the constants directly
+def build
+  classes = [Pokemon, Move, Type]
+  format = "#{@pastel.italic.bright_green('Building: :name')} :percent | ETA :eta"
+  
+  bar = TTY::ProgressBar.new(format, total: classes.length + 1, width: 50)
 
-  format = "#{pastel.italic.bright_green('Building: :name')} :percent | ETA :eta"
-  bar_options = {
-    count: classes.length,
-    width: 50,
-    complete: "=",
-    incomplete: "-",
-    clear: false
-  }
+  classes.each do |model|
+    bar.advance(0, name: model.name.ljust(15))
 
-  bar = TTY::ProgressBar.new(format, bar_options)
-
-
-classes.each do |model|
-  bar.advance(1, name: model.name.ljust(20))
-
-  if model.count.zero?
-    case model.name
-    when "Pokemon"
-      build_pkmn_from_graphql()
-    when "Move"
-      build_moves_from_restapi()
-    when "Type"
-      build_types_from_restapi()
+    if model.count.zero?
+      case model.name
+      when "Pokemon" then build_pkmn_from_graphql
+      when "Move"    then build_moves_from_restapi
+      when "Type"    then build_types_from_restapi
+      end
+    else
+      @prompt.say(@pastel.bold.bright_yellow.on_black("Skipping #{model.name} - data exists"))
     end
-  else
-    prompt.say("#{pastel.bold.bright_yellow.on_black("Skipping #{model.name} - already has data")}")
+    bar.advance(1)
   end
+
+
+  bar.advance(0, name: "Learned Moves")
+  unless Move.count.zero? || Pokemon.count.zero?
+    assign_learned_moves
+  end
+  bar.advance(1)
+
+  status_msg = PokemonMove.count.zero? ? 'ERR: Move Relations Failed' : 'Success: Assigned Move Relations'
+  @prompt.say(@pastel.bold.bright_magenta.on_black(status_msg))
+
+  !Pokemon.count.zero? && !Move.count.zero? && !Type.count.zero?
 end
-  bar.advance(name: "Learned Moves")
-  assign_learned_moves() unless Move.count.zero? || Pokemon.count.zero?
-  prompt.say(
-    "#{pastel.bold.bright_magenta.on_black((PokemonMove.count.zero?) ? 'ERR' : 'Success Assigned Move Relations')}" 
-  )
-  return (!Pokemon.count.zero? && !Move.count.zero? && !Type.count.zero?) ? true : false
-end
-
-prompt.say(
-  "#{pastel.bold.bright_blue.on_black('Assigning Leanred Moves..')}"
-)
 
 
 
-begin()
+@prompt.say(@pastel.bold.bright_blue.on_black('Starting Database Population Script...'))
 
+begin_process
 
-
-puts "===== RESULTS ====="
-puts "Build Pkmn #{(!Pokemon.count.zero?) ? '-> success' : '-> failed'}\nbuilt #{Pokemon.count} Pokemon models"
-puts "Build Move #{(!Move.count.zero?) ? '-> success' : '-> failed'}\nbuilt #{Move.count} Move models"
-puts "Build Type #{(!Type.count.zero?) ? '-> success' : '-> failed'}\nbuilt #{Type.count} Type models"
-puts "===== END ====="
-
+puts "\n" + "="*20 + " RESULTS " + "="*20
+puts "Build Pkmn: #{!Pokemon.count.zero? ? 'SUCCESS' : 'FAILED'} (#{Pokemon.count} records)"
+puts "Build Move: #{!Move.count.zero? ? 'SUCCESS' : 'FAILED'} (#{Move.count} records)"
+puts "Build Type: #{!Type.count.zero? ? 'SUCCESS' : 'FAILED'} (#{Type.count} records)"
+puts "="*49
