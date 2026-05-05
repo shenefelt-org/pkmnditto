@@ -70,7 +70,7 @@ module MovesHelper
     end
 
     moves_list = response.parsed_response["results"]
-    prompt.say(pastel.cyan("Found #{moves_list.length} moves. Starting detailed import..."))
+    prompt.say(pastel.cyan("\tFound #{moves_list.length} moves. Starting detailed import..."))
 
     bar = TTY::ProgressBar.new(
       "Building moves: [:bar] :name :percent",
