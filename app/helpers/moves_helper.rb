@@ -25,7 +25,7 @@ module MovesHelper
       end
     end
 
-    build_all
+    build_moves_from_restapi()
   end
 
   def destroy_db
@@ -56,7 +56,6 @@ module MovesHelper
     prompt = TTY::Prompt.new
 
     # 1. Get the initial list of moves
-    # Using the limit=2000 to get all moves in one list request
     url = "https://pokeapi.co/api/v2/move?limit=2000"
     response = HTTParty.get(url)
 
@@ -110,19 +109,4 @@ module MovesHelper
     true
   end
 
-  def build_all
-    pastel = Pastel.new
-    prompt = TTY::Prompt.new
-    
-    build_types_from_restapi
-    build_moves_from_graphql
-    build_pkmn_from_graphql
-
-    unless Move.count.zero? || Pokemon.count.zero?
-      assign_learned_moves
-    end
-
-    status_msg = PokemonMove.count.zero? ? 'ERR: Relations Failed' : 'Success: Assigned Move Relations'
-    prompt.say(pastel.bold.bright_magenta.on_black(status_msg))
-  end
 end
