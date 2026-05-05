@@ -1,3 +1,8 @@
+require 'httparty'
+require 'pastel'
+require 'tty-prompt'
+require 'tty-progressbar'
+
 module MovesHelper
   # --- SETUP AND COMPATIBILITY ---
   unless defined?(Fixnum)
@@ -67,15 +72,17 @@ module MovesHelper
     moves_list = response.parsed_response["results"]
     prompt.say(pastel.cyan("Found #{moves_list.length} moves. Starting detailed import..."))
 
+    bar = TTY::ProgressBar.new(
+      "Building moves: [:bar] :name :percent",
+      total: moves_list.length,
+      width: 30
+    )
+
     moves_list.each do |move|
       # Format the name for the UI
       display_name = move["name"].split("-").map(&:capitalize).join(" ")
       
-      if defined?(@bar)
-        @bar.advance(1, name: display_name.ljust(20))
-      else
-        prompt.say("Processing: #{display_name}")
-      end
+      bar.advance(name: display_name.ljust(20))
 
       # 2. Fetch details for THIS specific move
       detail_response = HTTParty.get(move["url"])
@@ -101,10 +108,10 @@ module MovesHelper
         short_text: short_txt
       )
 
-      # IMPORTANT: Slow down slightly to avoid hitting the 504 Gateway Timeout again
       sleep(0.05) 
     end
 
+    bar.finish
     prompt.ok(pastel.magenta("\nRestoration Complete! Moves built: #{Move.count}"))
     true
   end
