@@ -14,8 +14,11 @@ require 'tty-progressbar'
 require "pastel"
 
 module MovesHelper
-  @move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
+  @prompt = TTY::Prompt.new
+  @pastel = Pastel.new
   format = "Loading #{$pastel.bright_red("Loading moves :name")} [:bar] :percent"
+  @move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
+  @bar = TTY::ProgressBar.new(format, options)
   options = {
     total: Move.count,
     width: 40,
@@ -23,9 +26,6 @@ module MovesHelper
     incomplete: $pastel.bright_red.on_black("-"),
     clear: false
   }
-  @prompt = TTY::Prompt.new
-  @pastel = Pastel.new
-  @bar = TTY::ProgressBar.new(format, options)
 
 
 def build_moves_from_graphql
