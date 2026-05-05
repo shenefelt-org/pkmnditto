@@ -75,7 +75,7 @@ def build
       when "Type"    then build_types_from_restapi
       end
     else
-      @prompt.say(@pastel.bold.bright_yellow.on_black("Skipping #{model.name} - data exists"))
+      @prompt.say(@pastel.bold.bright_yellow.on_black("\tSkipping #{model.name} - data exists"))
     end
     bar.advance(1)
   end

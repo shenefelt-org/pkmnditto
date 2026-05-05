@@ -14,82 +14,95 @@ require 'tty-progressbar'
 require "pastel"
 
 module MovesHelper
-  $move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
-  $moves_map = []
-  $move_nodes_map = []
-  $pastel = Pastel.new
-  format = "Loading #{$pastel.bright_red("Loading moves..")} [:bar] :percent"
+  @move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
+  format = "Loading #{$pastel.bright_red("Loading moves :name")} [:bar] :percent"
   options = {
     total: Move.count,
     width: 40,
-    complete: $pastel.black.on_green("."),
-    incomplete: $pastel.bright_red.on_black(" "),
-    clear: true
+    complete: $pastel.black.on_green("="),
+    incomplete: $pastel.bright_red.on_black("-"),
+    clear: false
   }
-  $bar = TTY::ProgressBar.new(format, options)
-  $prompt = TTY::Prompt.new
+  @prompt = TTY::Prompt.new
+  @pastel = Pastel.new
+  @bar = TTY::ProgressBar.new(format, options)
 
-  def reset_bar()
-    $bar.finish()
-    $bar.reset()
-  end
 
-  # Build the tables and their relations
-def build_moves_from_restapi
+def build_moves_from_graphql
   move_count = Move.count
 
   if !move_count.zero?
-    $prompt.say("Err there are #{move_count} records in the DB", color: :red)
-    destroy = $prompt.ask("Do you want to clear the records?", default: "n")
-    if destroy&.downcase == "y"
+    @prompt.warn("Moves DB already contains #{move_count} records.")
+    if @prompt.yes?("Do you want to clear them?")
       Move.destroy_all 
-      $prompt.say("Database cleared.", color: :green)
+      @prompt.ok("Database cleared.")
     end
-  end 
-
-  # Fetch the initial list of moves
-  response = HTTParty.get($move_endpoint)
-  return nil if response.empty? || response["results"].empty?
-  
-  moves_list = response["results"]
-
-  # 1. Initialize the Progress Bar
-  # We use :item_name as a placeholder for the move being processed
-  bar = TTY::ProgressBar.new(
-    "Parsing :item_name [:bar] :percent", 
-    total: moves_list.count, 
-    width: 30
-  )
-
-  moves_list.each do |move| 
-    # 2. Update the label and advance the bar
-    # .ljust(20) ensures the bar doesn't jump around if names vary in length
-    bar.advance(item_name: move["name"].ljust(20))
-
-    move_datum = HTTParty.get(move["url"])
-    short_txt = move_datum['effect_entries'].find { |e| e['language']['name'] == 'en' }
-
-    model = Move.create(
-      name: move["name"].split("-").join(" "),
-      url: move["url"],
-      move_type: move_datum['type']['name'],
-      power: move_datum['power'] || 'data not available',
-      short_text: short_txt ? short_txt['short_effect'] : 'ERR NO DATA',
-    )
-    
-    next if model.nil? # Use next instead of return nil to keep the loop going
-    
-    # Small sleep so the user can actually see the progress bar movement
-    sleep(0.1) 
   end
 
-  # Final status check
-  final_count = Move.count
-  if !final_count.zero?
-    $prompt.say("\nSuccess! Moves Table has been built!", color: :magenta)
+  # Define the GraphQL Query
+  # We fetch the name, power, type name, and the english effect text in one go
+  query = <<~GQL
+    query GetMoves {
+      pokemon_v2_move {
+        name
+        power
+        pokemon_v2_type {
+          name
+        }
+        pokemon_v2_moveeffect {
+          pokemon_v2_moveeffecttexts(where: {language_id: {_eq: 9}}) {
+            short_effect
+          }
+        }
+      }
+    }
+  GQL
+
+  @prompt.say("Fetching moves data from GraphQL API...", color: :cyan)
+  
+  response = HTTParty.post(
+    "https://beta.pokeapi.co/graphql/v1beta",
+    headers: { 'Content-Type' => 'application/json' },
+    body: { query: query }.to_json
+  )
+
+  unless response.success? && response["data"]
+    @prompt.error("Failed to fetch data from GraphQL endpoint.")
+    return false
+  end
+
+  moves_data = response["data"]["pokemon_v2_move"]
+
+  # Update progress bar total if necessary
+  # @bar.total = moves_data.length 
+
+  moves_data.each do |move_datum|
+    # Format the name (e.g., "thunder-punch" -> "Thunder Punch")
+    formatted_name = move_datum["name"].split("-").map(&:capitalize).join(" ")
+    
+    @bar.advance(item_name: formatted_name.ljust(20))
+
+    # Extract the effect text safely
+    effect_array = move_datum.dig("pokemon_v2_moveeffect", "pokemon_v2_moveeffecttexts")
+    short_txt = effect_array&.first ? effect_array.first["short_effect"] : "No description available"
+
+    Move.create(
+      name: formatted_name,
+      move_type: move_datum.dig("pokemon_v2_type", "name"),
+      power: move_datum["power"] || 0,
+      short_text: short_txt
+    )
+    
+    # Optional: Small sleep to prevent UI flickering, 
+    # but no longer needed for rate limiting since it's one request!
+    sleep(0.01) 
+  end
+
+  if Move.count > 0
+    @prompt.say("\nSuccess! Moves Table has been built with #{Move.count} records!", color: :magenta)
     return true
   else
-    $prompt.say("\nFailure! Moves Table failed to build!", color: :cyan)
+    @prompt.error("\nFailure! No moves were saved to the database.")
     return false
   end
 end
@@ -99,8 +112,9 @@ end
     move_dat = get_move_by_url(url: move_url)
     return nil if move_dat.empty?
     short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
-    $prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
-    move = Move.create(
+    @prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
+
+    Move.create(
       name: move_dat['name'],
       url: move_url,
       move_type: move_dat['type']['name'],
