@@ -15,7 +15,7 @@ module MovesHelper
   def build_moves_from_restapi
     # 1. Fetch the initial list of moves
     response = HTTParty.get('https://pokeapi.co/api/v2/move?limit=1000')
-    return false if response.nil? || response["results"].nil?
+    return false if response.blank? || response["results"].blank?
     
     moves_list = response["results"]
     pastel = Pastel.new
