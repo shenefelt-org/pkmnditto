@@ -9,6 +9,7 @@ module TypesHelper
   $type_endpoint = "https://pokeapi.co/api/v2/type/"
   $default_type = "#{$type_endpoint}7"
   $types = []
+  $pastel = Pastel.new
   
   # also have this built a map that maps the name to the id of hte type
   def build_types_from_restapi
