@@ -71,7 +71,7 @@ def build
     if model.count.zero?
       case model.name
       when "Pokemon" then build_pkmn_from_graphql
-      when "Move"    then build_moves_from_graphql
+      when "Move"    then build_moves_from_restapi
       when "Type"    then build_types_from_restapi
       end
     else
