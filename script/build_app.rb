@@ -34,19 +34,24 @@ bar_options = {
 }
 bar = TTY::ProgressBar.new(format_string, bar_options)
 
+def begin
+  # Standardized the condition syntax and added the missing 'end'
+  if !Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?
+    
+    if prompt.yes?("#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}")
+      destroy_db()
+    else
+      prompt.say("#{pastel.italic.bright_red.inverse.on_white('Skipping Deletion')}")
+    end
 
-if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?)
-  if prompt.yes?(
-    "#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}")
-    destroy_db()
-
-  else
-    prompt.say(
-      "#{pastel.italic.bright_red.inverse.on_white('Skipping Deletion')}"
-    )
   end
 
+  build()
 end
+
+
+
+
 
 def destroy_db()
   prompt = TTY::Prompt.new
@@ -119,15 +124,13 @@ prompt.say(
 
 
 
-
-
+begin()
 
 
 
 puts "===== RESULTS ====="
-puts "Build Pkmn #{(!pkmn_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{pkmn_count} Pokemon models"
-puts "Build Move #{(!move_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{move_count} Move models"
-puts "Build Type #{(!type_count.zero?) ? '-> success' : '-> failed'}\nbuilt #{type_count} Type models"
+puts "Build Pkmn #{(!Pokemon.count.zero?) ? '-> success' : '-> failed'}\nbuilt #{Pokemon.count} Pokemon models"
+puts "Build Move #{(!Move.count.zero?) ? '-> success' : '-> failed'}\nbuilt #{Move.count} Move models"
+puts "Build Type #{(!Type.count.zero?) ? '-> success' : '-> failed'}\nbuilt #{Type.count} Type models"
 puts "===== END ====="
 
-return true
