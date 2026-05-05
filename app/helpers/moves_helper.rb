@@ -18,7 +18,6 @@ module MovesHelper
   @pastel = Pastel.new
   format = "Loading #{@pastel.bright_red("Loading moves :name")} [:bar] :percent"
   @move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
-  @bar = TTY::ProgressBar.new(format, options)
   options = {
     total: Move.count,
     width: 40,
@@ -26,6 +25,8 @@ module MovesHelper
     incomplete: @pastel.bright_red.on_black("-"),
     clear: false
   }
+  @bar = TTY::ProgressBar.new(format, options)
+
 
 
 def build_moves_from_graphql
