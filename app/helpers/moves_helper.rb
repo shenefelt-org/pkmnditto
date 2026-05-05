@@ -14,7 +14,7 @@ require 'tty-progressbar'
 module MovesHelper
   def build_moves_from_restapi
     # 1. Fetch the initial list of moves
-    response = HTTParty.get($move_endpoint)
+    response = HTTParty.get('https://pokeapi.co/api/v2/move?limit=1000')
     return false if response.nil? || response["results"].nil?
     
     moves_list = response["results"]
