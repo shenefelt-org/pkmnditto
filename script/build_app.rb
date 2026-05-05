@@ -19,7 +19,7 @@ include PokemonsHelper
 include TypesHelper
 include MovesHelper
 
-load Rails.root.join("script/destroy_db_tables.rb")
+
 
 pastel = Pastel.new 
 prompt = TTY::Prompt.new
@@ -37,9 +37,8 @@ bar = TTY::ProgressBar.new(format_string, bar_options)
 
 if(!Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?)
   if prompt.yes?(
-    "#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}",
-    default: "n")
-    destroyed = destroy_db()
+    "#{pastel.italic.bright_red.inverse.on_white('WARNING: DB already has data in it. This script is meant to be run on an empty db. Do you want to destroy the current db and repopulate it? (y/n)')}")
+    destroy_db()
 
   else
     prompt.say(
