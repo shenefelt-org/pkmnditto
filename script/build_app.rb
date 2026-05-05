@@ -136,7 +136,6 @@ def build_moves_from_restapi
       short_text: short_txt
     )
     
-    # Optional: Associate with Pokemon if your helper logic requires it here
     if details["learned_by_pokemon"]
       details["learned_by_pokemon"].each do |ld|
         pkmn = Pokemon.find_by(name: ld["name"])
