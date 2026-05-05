@@ -51,7 +51,7 @@ end
 
 def destroy_db()
   prompt = TTY::Prompt.new
-  methods = [Pokemon.class, Type.class, Move.class, DamageRelation.class]
+  methods = [Pokemon, Type, Move, DamageRelation]
   bar = TTY::ProgressBar.new(
   "Cleaning DB: [:bar] :item_name :percent", 
   total: methods.length, 
@@ -60,13 +60,13 @@ def destroy_db()
   incomplete: pastel.bright_green("-"),
   )
 
-methods.each do |model_data|
+  # destroy each model
+  methods.each do |model_data|
     bar.advance(item_name: model_data.name.ljust(20))
-    
     model_data.destroy_all
-    
     sleep(0.3) 
   end
+
   bar.finish()
   prompt.ok("#{pastel.bright_red('Database destruction complete..')}")
 
@@ -76,9 +76,19 @@ end
 def build()
   prompt = TTY::Prompt.net
   pastel = Pastel.new
-  format = "#{pastel.italic.bright_green('Building: :name')} :percent | ETA :eta"
+  classes = [Pokemon, Move, Type] # Use the constants directly
 
-classes = [Pokemon, Move, Type] # Use the constants directly
+  format = "#{pastel.italic.bright_green('Building: :name')} :percent | ETA :eta"
+  bar_options = {
+    count: classes.length,
+    width: 50,
+    complete: "=",
+    incomplete: "-",
+    clear: false
+  }
+
+  bar = TTY::ProgressBar.new(format, bar_options)
+
 
 classes.each do |model|
   bar.advance(1, name: model.name.ljust(20))
