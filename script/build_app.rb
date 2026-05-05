@@ -56,7 +56,8 @@ def destroy_db
 
   bar.finish
   @prompt.ok(@pastel.bright_red('Database destruction complete..'))
-  true
+
+  return true
 end
 
 def build
