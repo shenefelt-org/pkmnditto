@@ -55,12 +55,10 @@ module MovesHelper
     pastel = Pastel.new
     prompt = TTY::Prompt.new
     
-    # These methods are assumed to be in their respective helpers
     build_types_from_restapi
     build_moves_from_graphql
     build_pkmn_from_graphql
 
-    # Handle Post-Build Relations
     unless Move.count.zero? || Pokemon.count.zero?
       assign_learned_moves
     end
@@ -70,50 +68,80 @@ module MovesHelper
   end
 
   def build_moves_from_graphql
-    pastel = Pastel.new
-    prompt = TTY::Prompt.new
+  pastel = Pastel.new
+  prompt = TTY::Prompt.new
 
-    query = <<~GQL
-      query GetMoves {
-        move {
+  # 1. Define the Query
+  query = <<~GQL
+    query GetMoves {
+      move {
+        name
+        power
+        type {
           name
-          power
-          type {
-            name
-          }
-          move_effect {
-            move_effect_texts(where: {language_id: {_eq: 9}}) {
-              short_effect
-            }
+        }
+        move_effect {
+          move_effect_texts(where: {language_id: {_eq: 9}}) {
+            short_effect
           }
         }
       }
-    GQL
+    }
+  GQL
 
-    response = HTTParty.post(
-      "https://graphql.pokeapi.co/v1beta2",
-      headers: { 'Content-Type' => 'application/json' },
-      body: { query: query }.to_json
-    )
+  prompt.say(pastel.cyan("Fetching moves via GraphQL..."))
 
-    if response.code != 200 || response["data"].nil?
-      prompt.error("GraphQL Fetch Failed! Status: #{response.code}")
-      return false
-    end
+  # 2. Execute the Request
+  response = HTTParty.post(
+    "https://graphql.pokeapi.co/v1beta2",
+    headers: { 'Content-Type' => 'application/json' },
+    body: { query: query }.to_json
+  )
 
-    moves_data = response["data"]["move"]
-
-    moves_data.each do |move_datum|
-      formatted_name = move_datum["name"].split("-").map(&:capitalize).join(" ")
-      effect_text = move_datum.dig("move_effect", "move_effect_texts")&.first&.[]("short_effect")
-      
-      Move.create(
-        name: formatted_name,
-        move_type: move_datum.dig("type", "name") || "unknown",
-        power: move_datum["power"] || 0,
-        short_text: effect_text || "No description available"
-      )
-    end
-    true
+  # 3. Handle 504 Gateway Timeouts or Other Server Errors
+  # The error you saw occurred because 'response' was a string "Gateway Timeout"
+  unless response.success? && response.parsed_response.is_a?(Hash)
+    prompt.error("API Error: #{response.code} - #{response.message}")
+    prompt.error("The server might be down or timing out. Please try again in a few minutes.")
+    return false
   end
+
+  # 4. Safely Dig for Data
+  # We call .parsed_response to ensure we are working with a Hash, not the Response object
+  data = response.parsed_response
+  moves_data = data.dig("data", "move")
+
+  if moves_data.nil?
+    prompt.error("No move data found in the response.")
+    return false
+  end
+
+  # 5. Iterate and Create Records
+  moves_data.each do |move_datum|
+    # Format: "thunder-punch" -> "Thunder Punch"
+    formatted_name = move_datum["name"].split("-").map(&:capitalize).join(" ")
+    
+    # Progress feedback (assuming @bar is available or just using prompt)
+    if defined?(@bar)
+      @bar.advance(1, name: formatted_name.ljust(20))
+    else
+      prompt.say(pastel.green("Creating: #{formatted_name}"))
+    end
+
+    # Safe navigation for nested effect text
+    effect_array = move_datum.dig("move_effect", "move_effect_texts")
+    short_txt = effect_array&.first ? effect_array.first["short_effect"] : "No description available"
+
+    Move.create(
+      name: formatted_name,
+      move_type: move_datum.dig("type", "name") || "unknown",
+      power: move_datum["power"] || 0,
+      short_text: short_txt
+    )
+  end
+
+  prompt.ok(pastel.magenta("\nSuccess! Moves Table has been built with #{Move.count} records."))
+  true
+end
+
 end
