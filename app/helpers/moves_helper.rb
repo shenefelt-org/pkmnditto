@@ -1,10 +1,3 @@
-require 'httparty'
-require 'pastel'
-require 'tty-prompt'
-require 'tty-progressbar'
-
-module MovesHelper
-  # --- SETUP AND COMPATIBILITY ---
   unless defined?(Fixnum)
     Fixnum = Integer
   end
@@ -12,6 +5,14 @@ module MovesHelper
   unless defined?(Bignum)
     Bignum = Integer
   end
+require 'httparty'
+require 'pastel'
+require 'tty-prompt'
+require 'tty-progressbar'
+
+module MovesHelper
+  # --- SETUP AND COMPATIBILITY ---
+
 
   def begin_process
     # Re-initializing these inside the method ensures they are available 
