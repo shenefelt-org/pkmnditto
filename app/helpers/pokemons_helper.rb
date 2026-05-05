@@ -93,33 +93,42 @@ def build_pokemon_model(pkmn: nil)
   )
 end
 
-def get_pokemon_cries()
+def get_pokemon_cries
   pastel = Pastel.new
-  bar_options = {
-    total: Pokemon.count,
-    width: 100,
-    complete: "=",
-    incomplete: '-',
-    clear: false,
-  }
-  format = "#{pastel.bold.bright_green('Gathering cries for :name')} [:bar] :percent"
-  bar = TTY::ProgressBar.new(format, bar_options)
-  pkmn = Pokemon.all 
-  pkmn = build_pkmn_from_graphql() if pkmn.blank?
-  return nil if pkmn.blank?
+  prompt = TTY::Prompt.new
 
-  pkmn.each_with_index do |poke, index|
-    bar.advance(name: poke.name.ljust(20)) 
-    p = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{poke.id}") 
-    sleep(0.1)
-   poke.update(cries: [{
-      legacy: p.dig("cries", "legacy"),
-      latest: p.dig("cries", "latest")
-    }])
+  pokemon_list = Pokemon.all
+  
+  bar = TTY::ProgressBar.new(
+    "Gathering cries: [:bar] :pokemon_name :percent",
+    total: pokemon_list.count,
+    width: 30
+  )
 
+  pokemon_list.each_with_index do |pokemon, index|
+    bar.advance(pokemon_name: pokemon.name.ljust(20))
+
+    url = "https://pokeapi.co/api/v2/pokemon/#{pokemon.name.downcase}"
+    response = HTTParty.get(url)
+
+    # CHECK IF RESPONSE IS SUCCESSFUL AND IS A HASH
+    unless response.success? && response.parsed_response.is_a?(Hash)
+      prompt.warn(" Skipping #{pokemon.name}: API returned #{response.code}")
+      next
+    end
+
+    details = response.parsed_response
+    cry_url = details.dig('cries', 'latest')
+
+    if cry_url.present?
+      pokemon.update(cry_url: cry_url)
+    end
+
+    sleep(0.05)
   end
 
-  return true
+  bar.finish
+  prompt.ok(pastel.bright_cyan('Pokemon cries gathered!'))
 end
 
 
