@@ -61,49 +61,79 @@ def build_moves_from_graphql
 
   @prompt.say("Fetching moves data from GraphQL API...", color: :cyan)
   
+def build_moves_from_graphql
+  # 1. Check if DB has data
+  move_count = Move.count
+  if !move_count.zero?
+    @prompt.warn("Moves DB already contains #{move_count} records.")
+    if @prompt.yes?("Do you want to clear them?")
+      Move.destroy_all 
+      @prompt.ok("Database cleared.")
+    end
+  end
+
+  # 2. Define the Query (Simplified 2026 Schema)
+  # language_id 9 is English
+  query = <<~GQL
+    query GetMoves {
+      move {
+        name
+        power
+        type {
+          name
+        }
+        move_effect {
+          move_effect_texts(where: {language_id: {_eq: 9}}) {
+            short_effect
+          }
+        }
+      }
+    }
+  GQL
+
+  @prompt.say("Connecting to GraphQL v1beta2 endpoint...", color: :cyan)
+  
+  # 3. Execute Request
   response = HTTParty.post(
-    "https://beta.pokeapi.co/graphql/v1beta",
+    "https://graphql.pokeapi.co/v1beta2",
     headers: { 'Content-Type' => 'application/json' },
     body: { query: query }.to_json
   )
 
-  unless response.success? && response["data"]
-    @prompt.error("Failed to fetch data from GraphQL endpoint.")
+  # 4. Error Handling
+  if response.code != 200 || response["data"].nil?
+    @prompt.error("Fetch Failed! HTTP Status: #{response.code}")
+    puts "Server Response: #{response.body}" # Critical for debugging
     return false
   end
 
-  moves_data = response["data"]["pokemon_v2_move"]
+  moves_data = response["data"]["move"]
+  @prompt.say("Successfully fetched #{moves_data.length} moves.", color: :green)
 
-  # Update progress bar total if necessary
-  # @bar.total = moves_data.length 
-
+  # 5. Process Data
   moves_data.each do |move_datum|
-    # Format the name (e.g., "thunder-punch" -> "Thunder Punch")
+    # Format: "thunder-punch" -> "Thunder Punch"
     formatted_name = move_datum["name"].split("-").map(&:capitalize).join(" ")
     
-    @bar.advance(item_name: formatted_name.ljust(20))
+    @bar.advance(1, name: formatted_name.ljust(20))
 
-    # Extract the effect text safely
-    effect_array = move_datum.dig("pokemon_v2_moveeffect", "pokemon_v2_moveeffecttexts")
-    short_txt = effect_array&.first ? effect_array.first["short_effect"] : "No description available"
-
+    # Safely dig for the short effect text
+    effect_text = move_datum.dig("move_effect", "move_effect_texts")&.first&.[]("short_effect")
+    
     Move.create(
       name: formatted_name,
-      move_type: move_datum.dig("pokemon_v2_type", "name"),
+      move_type: move_datum.dig("type", "name") || "unknown",
       power: move_datum["power"] || 0,
-      short_text: short_txt
+      short_text: effect_text || "No description available"
     )
-    
-    # Optional: Small sleep to prevent UI flickering, 
-    # but no longer needed for rate limiting since it's one request!
-    sleep(0.01) 
   end
 
+  # 6. Final Status
   if Move.count > 0
-    @prompt.say("\nSuccess! Moves Table has been built with #{Move.count} records!", color: :magenta)
+    @prompt.say("\nDone! Moves Table built with #{Move.count} records.", color: :magenta)
     return true
   else
-    @prompt.error("\nFailure! No moves were saved to the database.")
+    @prompt.error("\nFailure! Database is empty after import.")
     return false
   end
 end
