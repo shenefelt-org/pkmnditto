@@ -1,5 +1,4 @@
-# temp fix for tty table err
-# Add this BEFORE any TTY requires
+# --- SETUP AND COMPATIBILITY ---
 unless defined?(Fixnum)
   Fixnum = Integer
 end
@@ -12,68 +11,95 @@ require 'tty'
 require 'tty-prompt'
 require 'tty-progressbar'
 require "pastel"
+require "httparty"
+require "json"
 
-module MovesHelper
-  @prompt = TTY::Prompt.new
-  @pastel = Pastel.new
-  format = "Loading #{@pastel.bright_red("Loading moves :name")} [:bar] :percent"
-  @move_endpoint = "https://pokeapi.co/api/v2/move?limit=950"
-  options = {
-    total: Move.count,
-    width: 40,
-    complete: @pastel.black.on_green("="),
-    incomplete: @pastel.bright_red.on_black("-"),
-    clear: false
-  }
-  @bar = TTY::ProgressBar.new(format, options)
+# Include your Rails/Custom Helpers
+include PokemonsHelper
+include TypesHelper
+include MovesHelper
 
+# Initialize shared styling (Instance variables for global access)
+@pastel = Pastel.new 
+@prompt = TTY::Prompt.new
 
+# --- MAIN CONTROL LOGIC ---
 
-def build_moves_from_graphql
-  move_count = Move.count
-
-  if !move_count.zero?
-    @prompt.warn("Moves DB already contains #{move_count} records.")
-    if @prompt.yes?("Do you want to clear them?")
-      Move.destroy_all 
-      @prompt.ok("Database cleared.")
+def begin_process
+  # Check if any data exists across core models
+  if !Pokemon.count.zero? || !Move.count.zero? || !Type.count.zero? || !DamageRelation.count.zero?
+    
+    warning_msg = @pastel.italic.bright_red.inverse.on_white(' WARNING: DB HAS DATA. Destroy and repopulate? (y/n) ')
+    
+    if @prompt.yes?(warning_msg)
+      destroy_db
+    else
+      @prompt.say(@pastel.italic.bright_red.inverse.on_white(' Skipping Deletion '))
     end
   end
 
-  # Define the GraphQL Query
-  # We fetch the name, power, type name, and the english effect text in one go
-  query = <<~GQL
-    query GetMoves {
-      pokemon_v2_move {
-        name
-        power
-        pokemon_v2_type {
-          name
-        }
-        pokemon_v2_moveeffect {
-          pokemon_v2_moveeffecttexts(where: {language_id: {_eq: 9}}) {
-            short_effect
-          }
-        }
-      }
-    }
-  GQL
+  build_all
+end
 
-  @prompt.say("Fetching moves data from GraphQL API...", color: :cyan)
+# --- DATABASE DESTRUCTION ---
+
+def destroy_db
+  models = [Pokemon, Type, Move, DamageRelation]
   
-def build_moves_from_graphql
-  # 1. Check if DB has data
-  move_count = Move.count
-  if !move_count.zero?
-    @prompt.warn("Moves DB already contains #{move_count} records.")
-    if @prompt.yes?("Do you want to clear them?")
-      Move.destroy_all 
-      @prompt.ok("Database cleared.")
-    end
+  bar = TTY::ProgressBar.new(
+    "Cleaning DB: [:bar] :item_name :percent", 
+    total: models.length, 
+    width: 30,
+    complete: @pastel.bright_red("="),
+    incomplete: @pastel.bright_green("-")
+  )
+
+  models.each do |model|
+    bar.advance(item_name: model.name.ljust(20))
+    model.destroy_all rescue nil # Rescue in case table doesn't exist yet
+    sleep(0.1) 
   end
 
-  # 2. Define the Query (Simplified 2026 Schema)
-  # language_id 9 is English
+  bar.finish
+  @prompt.ok(@pastel.bright_red('Database destruction complete.'))
+end
+
+# --- BUILDING LOGIC ---
+
+def build_all
+  # Define the sequence of build steps
+  steps = [
+    { name: "Types",   method: :build_types_from_restapi },
+    { name: "Moves",   method: :build_moves_from_graphql },
+    { name: "Pokemon", method: :build_pkmn_from_graphql }
+  ]
+
+  @bar = TTY::ProgressBar.new(
+    "#{@pastel.italic.bright_green('Total Progress:')} [:bar] :percent | ETA :eta", 
+    total: steps.length + 1, 
+    width: 50
+  )
+
+  steps.each do |step|
+    @bar.advance(0, name: step[:name])
+    send(step[:method]) # Calls the specific build method
+    @bar.advance(1)
+  end
+
+  # Handle Post-Build Relations
+  @bar.advance(0, name: "Relations")
+  unless Move.count.zero? || Pokemon.count.zero?
+    assign_learned_moves
+  end
+  @bar.advance(1)
+
+  status_msg = PokemonMove.count.zero? ? 'ERR: Relations Failed' : 'Success: Assigned Move Relations'
+  @prompt.say(@pastel.bold.bright_magenta.on_black(status_msg))
+end
+
+# --- THE GRAPHQL MOVE BUILDER ---
+
+def build_moves_from_graphql
   query = <<~GQL
     query GetMoves {
       move {
@@ -91,33 +117,23 @@ def build_moves_from_graphql
     }
   GQL
 
-  @prompt.say("Connecting to GraphQL v1beta2 endpoint...", color: :cyan)
-  
-  # 3. Execute Request
   response = HTTParty.post(
     "https://graphql.pokeapi.co/v1beta2",
     headers: { 'Content-Type' => 'application/json' },
     body: { query: query }.to_json
   )
 
-  # 4. Error Handling
   if response.code != 200 || response["data"].nil?
-    @prompt.error("Fetch Failed! HTTP Status: #{response.code}")
-    puts "Server Response: #{response.body}" # Critical for debugging
+    @prompt.error("GraphQL Fetch Failed! Status: #{response.code}")
     return false
   end
 
   moves_data = response["data"]["move"]
-  @prompt.say("Successfully fetched #{moves_data.length} moves.", color: :green)
 
-  # 5. Process Data
   moves_data.each do |move_datum|
-    # Format: "thunder-punch" -> "Thunder Punch"
     formatted_name = move_datum["name"].split("-").map(&:capitalize).join(" ")
     
-    @bar.advance(1, name: formatted_name.ljust(20))
-
-    # Safely dig for the short effect text
+    # Nested progress info for the moves specifically
     effect_text = move_datum.dig("move_effect", "move_effect_texts")&.first&.[]("short_effect")
     
     Move.create(
@@ -127,95 +143,17 @@ def build_moves_from_graphql
       short_text: effect_text || "No description available"
     )
   end
-
-  # 6. Final Status
-  if Move.count > 0
-    @prompt.say("\nDone! Moves Table built with #{Move.count} records.", color: :magenta)
-    return true
-  else
-    @prompt.error("\nFailure! Database is empty after import.")
-    return false
-  end
+  true
 end
 
-  def make_move_model(move_url: nil)
-    return nil if move_url.nil?
-    move_dat = get_move_by_url(url: move_url)
-    return nil if move_dat.empty?
-    short_effect = move_dat['effect_entries'].find { |entry| entry['language']['name'] == 'en' }
-    @prompt.say("Success Move Node created for { #{move_dat['name']} }", color: :blue)
+# --- EXECUTION ---
 
-    Move.create(
-      name: move_dat['name'],
-      url: move_url,
-      move_type: move_dat['type']['name'],
-      power: move_dat['power'] ||= 'data_not available from the pokeapi',
-      short_text: short_effect ? short_effect['short_effect'] : "ERR"
-    )
+puts "\n" + @pastel.bold.bright_blue.on_black(' POKEMON DATABASE SEEDER v2026 ') + "\n\n"
 
+begin_process
 
-    return move
-
-
-  end
-
-  def get_move_by_url(url: nil)
-    return nil if url.nil?
-    $prompt.say("Fetching move data from url: #{url}", color: :yellow)
-    move_info = HTTParty.get(url)
-    return nil if move_info.empty?
-    $prompt.say("Success featched move data from url: #{url}", color: :green)
-    move_info
-  end
-
-  def get_move_url_by_name(move_name: nil)
-    return nil if move_name.nil? || move_name.empty?
-    $moves_map = build_moves_map() unless $moves_map.present? # check to make sure its present e.g. not blank flase or nil
-    move = $moves_map.find { |m| m[:name] == move_name.downcase }
-    return move[:url] if move.present?
-    false # if we make it here no move was found by that name
-  end
-
-
-  
-def assign_learned_moves()
-  return nil if Move.count.zero?
-  moves = Move.all
-  moves.each do |move|
-    move_data = HTTParty.get(move.url)
-    next if move_data.empty? || move_data['learned_by_pokemon'].empty?
-
-    move_data['learned_by_pokemon'].each do |pokemon|
-      pkmn_record = Pokemon.find_by(name: pokemon['name'])
-      next if pkmn_record.nil?
-
-      PokemonMove.create(
-        pokemon_id: pkmn_record.poke_id,
-        move_id: move.id
-      )
-    end
-  end
-
-  return true
-end
-
-def move_weaknesses(move_name: nil)
-  return nil if move_name.nil?
-  move = Move.find_by(name: move_name)
-  return unless move
-  move_type = move.move_type
-  type = Type.find_by(name: move_type)
-  return nil unless type
-  damage_relation = DamageRelation.find_by(type_id: type.id)
-  return nil unless damage_relation
-
-  # Get the types that are weak to this move's type
-  weaknesses = damage_relation.double_damage_to
-  return weaknesses unless weaknesses.empty?
-  return nil
-end
-
-
-  
-
-end
+puts "\n" + "="*20 + " RESULTS " + "="*20
+puts "Build Pkmn: #{!Pokemon.count.zero? ? 'SUCCESS' : 'FAILED'} (#{Pokemon.count} records)"
+puts "Build Move: #{!Move.count.zero? ? 'SUCCESS' : 'FAILED'} (#{Move.count} records)"
+puts "Build Type: #{!Type.count.zero? ? 'SUCCESS' : 'FAILED'} (#{Type.count} records)"
+puts "="*49
