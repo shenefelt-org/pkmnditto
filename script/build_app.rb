@@ -136,6 +136,7 @@ end
 
 
 @prompt.say(@pastel.bold.bright_blue.on_black(' Starting Database Population Script... '))
+
 def assign_learned_moves(pkmn: nil)
     return nil if pkmn.nil?
     moves = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pkmn.name.downcase}")
@@ -157,7 +158,7 @@ def assign_learned_moves(pkmn: nil)
         end
     end
 
-    return (true)
+    return ()
 end
 
 begin_process

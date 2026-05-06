@@ -12,6 +12,7 @@ require 'tty-prompt'
 require 'tty-progressbar'
 
 module MovesHelper
+  
   def build_moves_from_restapi
     # 1. Fetch the initial list of moves
     response = HTTParty.get('https://pokeapi.co/api/v2/move?limit=1000')
@@ -40,15 +41,16 @@ module MovesHelper
       short_txt = short_txt_node ? short_txt_node['short_effect'] : 'ERR NO DATA'
       move_type = Type.find_by(name: move_datum['type']['name'])
 
-      # 4. Create the Move Record
-      model = Move.create(
-        name: move["name"],
-        url: move["url"],
-        move_type: move_datum['type']['name'],
-        power: move_datum['power'] || 'data not available',
-        short_text: short_txt,
-        type_id: move_type ? move_type.id : 1
-      )
+model = Move.find_or_create_by(name: move["name"]) do |m|
+  m.url = move["url"]
+  m.move_type = move_datum['type']['name']
+  m.power = move_datum['power'] || 'data not available'
+  m.short_text = short_txt
+  m.type_id = move_type ? move_type.id : 1
+end
+
+end
+
       
       next if model.nil?
 
