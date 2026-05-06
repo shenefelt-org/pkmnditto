@@ -126,8 +126,8 @@ def build_moves_from_restapi
     )
 
     next if model.nil?
+    assign_learned_moves(pkmn: model)
     
-
     sleep(0.05) 
   end
   return assign_learned_by
@@ -136,6 +136,29 @@ end
 
 
 @prompt.say(@pastel.bold.bright_blue.on_black(' Starting Database Population Script... '))
+def assign_learned_moves(pkmn: nil)
+    return nil if pkmn.nil?
+    moves = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pkmn.name.downcase}")
+    return nil if moves.blank? || moves["moves"].blank?
+
+    Pokemon.all.each do |pokemon|
+        moves_list = moves["moves"]
+        moves_list.each do |move|
+            move_name = move["name"]
+            next if move_name.nil?
+    
+            move_record = Move.find_by(name: move_name)
+            next if move_record.nil?
+    
+            PokemonMove.find(
+            pokemon_id: pokemon.poke_id,
+            move_id: move_record.id
+            )
+        end
+    end
+
+    return (true)
+end
 
 begin_process
 

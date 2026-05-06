@@ -144,6 +144,11 @@ def find_damage_relations(pkmn: nil)
   return damage_relations
 end
 
+
+def assign_learned_moves(pkmn: nil)
+end
+
+
 end
 
 
