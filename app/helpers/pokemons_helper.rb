@@ -147,7 +147,7 @@ module PokemonsHelper
     return nil if pkmn.nil?
 
     # 1. Fetch moves for the specific pokemon
-    response = HTTParty.get("#{endpoint}#{pkmn.name.downcase}")
+    response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/#{pkmn.name.downcase}")
     return nil if response.blank? || response["moves"].blank?
 
     response["moves"].each do |move_data|
