@@ -71,13 +71,15 @@ def build_pkmn_from_graphql
        default_sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{pkmn['poke_id']}.png",
      ) 
 
-  end
+    assign_learned_moves(pkmn: pkmn)
 
+
+  end
 
   return false if Pokemon.count.zero?
   cries_format = "#{pastel.bold.bright_magenta('Gathering Pokemon Cries')}"
   prompt.say(cries_format)
-  return get_pokemon_cries() ? prompt.say("#{pastel.bold.bright_green('Success! Pokemon Cries Gathered!')}") : prompt.say("#{pastel.bold.bright_red('Failed to gather cries')}")
+  get_pokemon_cries() ? prompt.say("#{pastel.bold.bright_green('Success! Pokemon Cries Gathered!')}") : prompt.say("#{pastel.bold.bright_red('Failed to gather cries')}")
 
 end
     
@@ -133,10 +135,7 @@ def get_pokemon_cries
   prompt.ok(pastel.bright_cyan('Pokemon cries gathered!'))
 end
 
-def get_known_moves(pkmn: nil)
-  return nil if pkmn.nil?
-  moves = 
-end
+
 
 
 # Find a pokemons damage relations (this will be done by active record in the application)
@@ -154,47 +153,42 @@ end
 
 def assign_learned_moves(pkmn: nil)
   return nil if pkmn.nil?
-  moves = HTTParty.get("#{endpoint}#{pkmn.name.downcase}")
-  return nil if moves.blank?
-  moves["moves"].each_with_index do |move_data, index|
-    name = move_data["move'"]["name"]
+
+  # 1. Fetch moves for the specific pokemon
+  response = HTTParty.get("#{endpoint}#{pkmn.name.downcase}")
+  return nil if response.blank? || response["moves"].blank?
+
+  response["moves"].each do |move_data|
+    name = move_data["move"]["name"] # Fixed typo: removed extra '
     url = move_data["move"]["url"]
-  end 
-        # 3. Fetch detailed move data
-      move_datum = HTTParty.get(move["url"])
-      next unless move_datum.success?
 
-      # Find English short effect
-      short_txt_node = move_datum["effect_entries"].find { |e| e["language"]["name"] == "en" }
-      short_txt = short_txt_node ? short_txt_node["short_effect"] : "ERR NO DATA"
+    # 2. Fetch detailed move data FIRST so we have power, type, etc.
+    move_details = HTTParty.get(url)
+    next unless move_details.success?
 
-      move_type = Type.find_or_create_by(name: move["type"]["name"]) do |t|
-        t.name = move["type"]["name"]
-        t.url = move["url"]
-      end
+    # 3. Parse details for the Move record
+    short_txt_node = move_details["effect_entries"].find { |e| e["language"]["name"] == "en" }
+    short_txt = short_txt_node ? short_txt_node["short_effect"] : "ERR NO DATA"
 
-      model = Move.find_or_create_by(name: move["name"]) do |m|
-        m.url = move["url"]
-        m.move_type = move_datum["type"]["name"]
-        m.power = move_datum["power"] || "data not available"
-        m.short_text = short_txt
-        m.type_id = move_type ? move_type.id : 1
-      end
-require 'httparty'
+    # Find or create the Type
+    type_name = move_details["type"]["name"]
+    move_type = Type.find_or_create_by(name: type_name)
 
-# HTTParty returns a parsed Ruby Hash/Array automatically
-response = HTTParty.get('https://pokeapi.co/api/v2/pokemon/pikachu')
+    # 4. Find or create the Move with all data present
+    move = Move.find_or_create_by(name: name) do |m|
+      m.url = url
+      m.move_type = type_name
+      m.power = move_details["power"] || "data not available"
+      m.short_text = short_txt
+      m.type_id = move_type&.id || 1
+    end
 
-# Directly access the moves
-first_move = response["moves"][0]["move"]
-
-puts "First Move Name: #{first_move['name']}"
-
-# You can also use Ruby's .map to quickly list all move names
-all_move_names = response["moves"].map { |m| m["move"]["name"] }
-puts "Total moves found: #{all_move_names.length}"
-
+    # 5. Create the association between this Pokemon and the Move
+    # (Assuming a join table like PokemonMove)
+    PokemonMove.find_or_create_by(pokemon_id: pkmn.id, move_id: move.id)
+  end
 end
+
 
 
 end
