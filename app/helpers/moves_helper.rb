@@ -56,7 +56,7 @@ module MovesHelper
           pokemon = Pokemon.find_by(name: ld["name"])
           next if pokemon.nil?
 
-          PokemonMove.find_or_create_by(
+          PokemonMove.create(
             pokemon_id: pokemon.poke_id,
             move_id: model.id
           )
@@ -64,7 +64,7 @@ module MovesHelper
       end
 
       # Small sleep so the user can actually see the progress bar movement
-      sleep(0.05) 
+      sleep(0.1) 
     end
 
     # 6. Final status check
