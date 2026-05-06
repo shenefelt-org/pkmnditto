@@ -1,7 +1,6 @@
 unless defined?(Fixnum)
   Fixnum = Integer
 end
-
 unless defined?(Bignum)
   Bignum = Integer
 end
@@ -12,24 +11,23 @@ require 'tty-prompt'
 require 'tty-progressbar'
 
 module MovesHelper
-  
   def build_moves_from_restapi
     # 1. Fetch the initial list of moves
     response = HTTParty.get('https://pokeapi.co/api/v2/move?limit=1000')
     return false if response.blank? || response["results"].blank?
-    
+
     moves_list = response["results"]
     pastel = Pastel.new
     prompt = TTY::Prompt.new
 
     # 2. Initialize the Progress Bar
     bar = TTY::ProgressBar.new(
-      "Parsing :item_name [:bar] :percent", 
-      total: moves_list.count, 
+      "Parsing :item_name [:bar] :percent",
+      total: moves_list.count,
       width: 30
     )
 
-    moves_list.each do |move| 
+    moves_list.each do |move|
       bar.advance(item_name: move["name"].ljust(20))
 
       # 3. Fetch detailed move data
@@ -41,17 +39,15 @@ module MovesHelper
       short_txt = short_txt_node ? short_txt_node['short_effect'] : 'ERR NO DATA'
       move_type = Type.find_by(name: move_datum['type']['name'])
 
-model = Move.find_or_create_by(name: move["name"]) do |m|
-  m.url = move["url"]
-  m.move_type = move_datum['type']['name']
-  m.power = move_datum['power'] || 'data not available'
-  m.short_text = short_txt
-  m.type_id = move_type ? move_type.id : 1
-end
+      model = Move.find_or_create_by(name: move["name"]) do |m|
+        m.url = move["url"]
+        m.move_type = move_datum['type']['name']
+        m.power = move_datum['power'] || 'data not available'
+        m.short_text = short_txt
+        m.type_id = move_type ? move_type.id : 1
+      end
 
-end
-
-      
+      # --- FIX: These were outside the loop in your snippet ---
       next if model.nil?
 
       # 5. Associate with Pokemon (learned_by_pokemon)
@@ -60,7 +56,7 @@ end
           pokemon = Pokemon.find_by(name: ld["name"])
           next if pokemon.nil?
 
-          PokemonMove.create(
+          PokemonMove.find_or_create_by(
             pokemon_id: pokemon.poke_id,
             move_id: model.id
           )
@@ -68,8 +64,8 @@ end
       end
 
       # Small sleep so the user can actually see the progress bar movement
-      sleep(0.1) 
-    end
+      sleep(0.1)
+    end # This 'end' closes the moves_list.each loop
 
     # 6. Final status check
     final_count = Move.count
