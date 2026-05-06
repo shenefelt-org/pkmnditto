@@ -124,14 +124,16 @@ def build_moves_from_restapi
       power: details['power'] || 0,
       short_text: short_txt
     )
+
+    next if model.nil?
     
-    if details["learned_by_pokemon"]
-      details["learned_by_pokemon"].each do |ld|
-        pkmn = Pokemon.find_by(name: ld["name"])
-        next if pkmn.nil?
-        PokemonMove.find_or_create_by(pokemon_id: pkmn.poke_id, move_id: model.id)
-      end
-    end
+    # if details["learned_by_pokemon"]
+    #   details["learned_by_pokemon"].each do |ld|
+    #     pkmn = Pokemon.find_by(name: ld["name"])
+    #     next if pkmn.nil?
+    #     PokemonMove.create(pokemon_id: pkmn.poke_id, move_id: model.id)
+    #   end
+    # end
 
     sleep(0.05) 
   end
