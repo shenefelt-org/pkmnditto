@@ -13,7 +13,8 @@ require 'tty-prompt'
 require 'tty-progressbar'
 require 'pastel'
 module PokemonsHelper
-  include MovesHelper
+  include PokemonsHelper
+  @endpoint = "https://pokeapi.co/api/v2/pokemon/"
 
   # gets pokemon data for every pokemon and creates and stores a model in the db for each one
   # DO NOT RUN without dumping the curent db 
@@ -60,7 +61,8 @@ def build_pkmn_from_graphql
     bar.advance(name: pkmn['name'].ljust(20))
     sleep(0.2)
     
-     Pokemon.create(
+     pkmn = Pokemon.create(
+      # --- FIX: These were outside the loop in your snippet ---
        poke_id:        pkmn['poke_id'],
        name:           pkmn['name'],
        base_exp:       pkmn['base_exp'],
@@ -131,6 +133,11 @@ def get_pokemon_cries
   prompt.ok(pastel.bright_cyan('Pokemon cries gathered!'))
 end
 
+def get_known_moves(pkmn: nil)
+  return nil if pkmn.nil?
+  moves = 
+end
+
 
 # Find a pokemons damage relations (this will be done by active record in the application)
 def find_damage_relations(pkmn: nil)
@@ -146,6 +153,47 @@ end
 
 
 def assign_learned_moves(pkmn: nil)
+  return nil if pkmn.nil?
+  moves = HTTParty.get("#{endpoint}#{pkmn.name.downcase}")
+  return nil if moves.blank?
+  moves["moves"].each_with_index do |move_data, index|
+    name = move_data["move'"]["name"]
+    url = move_data["move"]["url"]
+  end 
+        # 3. Fetch detailed move data
+      move_datum = HTTParty.get(move["url"])
+      next unless move_datum.success?
+
+      # Find English short effect
+      short_txt_node = move_datum["effect_entries"].find { |e| e["language"]["name"] == "en" }
+      short_txt = short_txt_node ? short_txt_node["short_effect"] : "ERR NO DATA"
+
+      move_type = Type.find_or_create_by(name: move["type"]["name"]) do |t|
+        t.name = move["type"]["name"]
+        t.url = move["url"]
+      end
+
+      model = Move.find_or_create_by(name: move["name"]) do |m|
+        m.url = move["url"]
+        m.move_type = move_datum["type"]["name"]
+        m.power = move_datum["power"] || "data not available"
+        m.short_text = short_txt
+        m.type_id = move_type ? move_type.id : 1
+      end
+require 'httparty'
+
+# HTTParty returns a parsed Ruby Hash/Array automatically
+response = HTTParty.get('https://pokeapi.co/api/v2/pokemon/pikachu')
+
+# Directly access the moves
+first_move = response["moves"][0]["move"]
+
+puts "First Move Name: #{first_move['name']}"
+
+# You can also use Ruby's .map to quickly list all move names
+all_move_names = response["moves"].map { |m| m["move"]["name"] }
+puts "Total moves found: #{all_move_names.length}"
+
 end
 
 

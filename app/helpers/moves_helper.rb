@@ -5,15 +5,15 @@ unless defined?(Bignum)
   Bignum = Integer
 end
 
-require 'httparty'
-require 'pastel'
-require 'tty-prompt'
-require 'tty-progressbar'
+require "httparty"
+require "pastel"
+require "tty-prompt"
+require "tty-progressbar"
 
 module MovesHelper
   def build_moves_from_restapi
     # 1. Fetch the initial list of moves
-    response = HTTParty.get('https://pokeapi.co/api/v2/move?limit=1000')
+    response = HTTParty.get("https://pokeapi.co/api/v2/move?limit=1000")
     return false if response.blank? || response["results"].blank?
 
     moves_list = response["results"]
@@ -24,30 +24,46 @@ module MovesHelper
     bar = TTY::ProgressBar.new(
       "Parsing :item_name [:bar] :percent",
       total: moves_list.count,
-      width: 30
+      width: 30,
     )
 
     moves_list.each do |move|
       bar.advance(item_name: move["name"].ljust(20))
 
+      require "httparty"
+
+      # HTTParty returns a parsed Ruby Hash/Array automatically
+      response = HTTParty.get("https://pokeapi.co/api/v2/pokemon/pikachu")
+
+      # Directly access the moves
+      first_move = response["moves"][0]["move"]
+
+      puts "First Move Name: #{first_move["name"]}"
+
+      # You can also use Ruby's .map to quickly list all move names
+      all_move_names = response["moves"].map { |m| m["move"]["name"] }
+      puts "Total moves found: #{all_move_names.length}"
       # 3. Fetch detailed move data
       move_datum = HTTParty.get(move["url"])
       next unless move_datum.success?
 
       # Find English short effect
-      short_txt_node = move_datum['effect_entries'].find { |e| e['language']['name'] == 'en' }
-      short_txt = short_txt_node ? short_txt_node['short_effect'] : 'ERR NO DATA'
-      move_type = Type.find_by(name: move_datum['type']['name'])
+      short_txt_node = move_datum["effect_entries"].find { |e| e["language"]["name"] == "en" }
+      short_txt = short_txt_node ? short_txt_node["short_effect"] : "ERR NO DATA"
+
+      move_type = Type.find_or_create_by(name: move["type"]["name"]) do |t|
+        t.name = move["type"]["name"]
+        t.url = move["url"]
+      end
 
       model = Move.find_or_create_by(name: move["name"]) do |m|
         m.url = move["url"]
-        m.move_type = move_datum['type']['name']
-        m.power = move_datum['power'] || 'data not available'
+        m.move_type = move_datum["type"]["name"]
+        m.power = move_datum["power"] || "data not available"
         m.short_text = short_txt
         m.type_id = move_type ? move_type.id : 1
       end
 
-      # --- FIX: These were outside the loop in your snippet ---
       next if model.nil?
 
       # 5. Associate with Pokemon (learned_by_pokemon)
@@ -58,7 +74,7 @@ module MovesHelper
 
           PokemonMove.find_or_create_by(
             pokemon_id: pokemon.poke_id,
-            move_id: model.id
+            move_id: model.id,
           )
         end
       end
