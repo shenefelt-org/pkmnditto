@@ -38,14 +38,16 @@ module MovesHelper
       # Find English short effect
       short_txt_node = move_datum['effect_entries'].find { |e| e['language']['name'] == 'en' }
       short_txt = short_txt_node ? short_txt_node['short_effect'] : 'ERR NO DATA'
+      move_type = Type.find_by(name: move_datum['type']['name'])
 
       # 4. Create the Move Record
       model = Move.create(
-        name: move["name"].split("-").join(" "),
+        name: move["name"],
         url: move["url"],
-        move_type: move_datum.dig('type', 'name'),
+        move_type: move_datum['type']['name'],
         power: move_datum['power'] || 'data not available',
-        short_text: short_txt
+        short_text: short_txt,
+        type_id: move_type ? move_type.id : 1
       )
       
       next if model.nil?
