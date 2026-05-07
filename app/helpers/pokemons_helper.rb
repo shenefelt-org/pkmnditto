@@ -117,12 +117,18 @@ module PokemonsHelper
         next
       end
 
-      details = response.parsed_response
-      cry_url = details.dig("cries", "latest")
+      details = response["cries"]
+      return nil if details.empty?
 
-      if cry_url.present?
-        pokemon.update(cries: cry_url)
-      end
+      r = []
+      datum = {
+        :latest => details["latest"],
+        :legacy => details["legacy"],
+      }
+
+      r.push(datum)
+
+      pokemon.update(cries: r)
 
       sleep(0.05)
     end
