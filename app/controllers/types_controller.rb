@@ -4,6 +4,10 @@ class TypesController < ApplicationController
   # GET /types or /types.json
   def index
     @types = Type.all
+    render json: {
+      message: "There are a total of #{Type.count} types in the db",
+      data: @types,
+    }
   end
 
   # GET /types/1 or /types/1.json
@@ -58,13 +62,14 @@ class TypesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_type
-      @type = Type.find(params.expect(:id))
-    end
 
-    # Only allow a list of trusted parameters through.
-    def type_params
-      params.expect(type: [ :type_id, :type_name ])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_type
+    @type = Type.find(params.expect(:id))
+  end
+
+  # Only allow a list of trusted parameters through.
+  def type_params
+    params.expect(type: [:type_id, :type_name])
+  end
 end
