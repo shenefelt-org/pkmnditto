@@ -6,13 +6,11 @@ unless defined?(Bignum)
   Bignum = Integer
 end
 
-require 'tty-table'
+require "tty-table"
 
 module AppLogsHelper
-  def print_table
-    
-    table = TTY::Table.new(header: ['level', 'method', 'path', 'ip_address'])
-
+  def print_log_table
+    table = TTY::Table.new(header: ["level", "method", "path", "ip_address"])
 
     AppLog.all.each do |row|
       table << [row[:level], row[:method], row[:path], row[:ip_address]]

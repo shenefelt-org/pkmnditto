@@ -77,14 +77,12 @@ class TypesController < ApplicationController
   end
 
   def log_types_request
-    log_msg = "REQUEST METHOD: #{request.method} | PATH: #{request.path}"
-
     AppLog.create(
       level: "INFO",
-      message: log_msg,
+      method: request.method,
+      path: request.path,
       ip_address: request.remote_ip,
       agent: request.user_agent,
-      user_id: User.first&.id,
     )
   end
 end
