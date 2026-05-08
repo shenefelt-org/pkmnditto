@@ -1,5 +1,6 @@
 class PokemonsController < ApplicationController
   before_action :set_pokemon, only: %i[ show edit update destroy ]
+  before_action :log_index_request
 
   # GET /pokemons
   def index
@@ -9,10 +10,9 @@ class PokemonsController < ApplicationController
       term = "%#{@q.downcase}%"
       @pokemons = @pokemons.where(
         "LOWER(name) LIKE :t OR LOWER(pkmn_type) LIKE :t OR LOWER(abilities) LIKE :t",
-        t: term
+        t: term,
       )
     end
-    @pokemons = @pokemons.ordered_by_pokedex
   end
 
   # GET /pokemons/1
@@ -61,14 +61,13 @@ class PokemonsController < ApplicationController
   end
 
   def pokemon_params
-    permitted = params.expect(pokemon: [ :poke_id, :name, :base_exp, :pkmn_type, :default_sprite, :abilities ])
+    permitted = params.expect(pokemon: [:poke_id, :name, :base_exp, :pkmn_type, :default_sprite, :abilities])
 
     # `abilities` is serialized as a JSON Array on the model. The form sends a
     # newline- or comma-separated string, so normalize it here.
     if permitted[:abilities].is_a?(String)
       raw = permitted[:abilities].strip
-      permitted[:abilities] =
-        if raw.empty?
+      permitted[:abilities] = if raw.empty?
           []
         else
           begin
@@ -81,5 +80,15 @@ class PokemonsController < ApplicationController
     end
 
     permitted
+  end
+
+  def log_index_request(log_level: nil)
+    AppLog.create(
+      level: log_level ? log_level : "INFO",
+      method: request.method,
+      path: request.path,
+      ip_address: request.remote_ip,
+      agent: request.user_agent,
+    )
   end
 end

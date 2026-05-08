@@ -3,6 +3,10 @@
 <%= render @doc %>
 
 <div>
+  <div>
+    <p><%= @doc.name %></p>
+    <p style="margin: 0"><%= @doc.content %></p>
+  </div>
   <%= link_to "Edit this doc", edit_doc_path(@doc) %> |
   <%= link_to "Back to docs", docs_path %>
 

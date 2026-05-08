@@ -1,0 +1,11 @@
+<% content_for :title, "New app log" %>
+
+<h1>New app log</h1>
+
+<%= render "form", app_log: @app_log %>
+
+<br>
+
+<div>
+  <%= link_to "Back to app logs", app_logs_path %>
+</div>

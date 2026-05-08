@@ -10,9 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_07_191054) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_08_155358) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "app_logs", force: :cascade do |t|
+    t.string "agent"
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.string "level"
+    t.string "method"
+    t.string "path"
+    t.datetime "updated_at", null: false
+  end
 
   create_table "damage_relations", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -34,7 +44,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_191054) do
     t.string "name"
     t.string "permalink"
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["name"], name: "index_docs_on_name", unique: true
+    t.index ["user_id"], name: "index_docs_on_user_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -117,6 +129,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_07_191054) do
   end
 
   add_foreign_key "damage_relations", "types"
+  add_foreign_key "docs", "users"
   add_foreign_key "move_learned_bies", "moves"
   add_foreign_key "move_learned_bies", "pokemons"
   add_foreign_key "move_weaknesses", "moves"

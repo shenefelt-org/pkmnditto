@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :app_logs
+  resources :users
   resources :docs
   resources :damage_relations
   resources :moves

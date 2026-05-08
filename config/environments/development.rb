@@ -61,7 +61,7 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # --- CLOUDFLARE TUNNEL & HOST CONFIGURATION ---
-  
+
   # Allow the tunnel and local requests
   config.hosts << "www.shenefelt.org"
   config.hosts << "shenefelt.org"
@@ -74,6 +74,6 @@ Rails.application.configure do
 
   # Ensure Rails trusts the headers Cloudflare sends
   config.action_dispatch.default_headers = {
-    'X-Forwarded-Host' => 'www.shenefelt.org'
+    "X-Forwarded-Host" => "shenefelt.org",
   }
 end

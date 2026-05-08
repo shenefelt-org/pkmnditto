@@ -1,17 +1,20 @@
 class TypesController < ApplicationController
   before_action :set_type, only: %i[ show edit update destroy ]
+  before_action :log_types_request
 
   # GET /types or /types.json
   def index
     @types = Type.all
     render json: {
-      message: "There are a total of #{Type.count} types in the db",
+      method: request.method,
+      user_ip: request.remote_ip,
       data: @types,
     }
   end
 
   # GET /types/1 or /types/1.json
   def show
+    render json: @type
   end
 
   # GET /types/new
@@ -71,5 +74,17 @@ class TypesController < ApplicationController
   # Only allow a list of trusted parameters through.
   def type_params
     params.expect(type: [:type_id, :type_name])
+  end
+
+  def log_types_request
+    log_msg = "REQUEST METHOD: #{request.method} | PATH: #{request.path}"
+
+    AppLog.create(
+      level: "INFO",
+      message: log_msg,
+      ip_address: request.remote_ip,
+      agent: request.user_agent,
+      user_id: User.first&.id,
+    )
   end
 end
